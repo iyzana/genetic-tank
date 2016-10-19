@@ -28,22 +28,23 @@ class App : Application() {
             val group = Group()
             group.children += canvas
             scene = Scene(group)
+            
+            addInputListeners(scene)
         }
 
-        addInputListeners(canvas)
 
         GameLoop(canvas).start()
 
         stage.show()
     }
 
-    private fun addInputListeners(canvas: Canvas) {
-        canvas.onMouseMoved = Mouse
-        canvas.onMouseDragged = Mouse
-        canvas.onMousePressed = Mouse
-        canvas.onMouseReleased = Mouse
-        canvas.onKeyPressed = Keyboard
-        canvas.onKeyReleased = Keyboard
+    private fun addInputListeners(scene: Scene) {
+        scene.onMouseMoved = Mouse
+        scene.onMouseDragged = Mouse
+        scene.onMousePressed = Mouse
+        scene.onMouseReleased = Mouse
+        scene.onKeyPressed = Keyboard
+        scene.onKeyReleased = Keyboard
     }
 }
 
