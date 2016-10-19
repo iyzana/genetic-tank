@@ -31,8 +31,7 @@ class App : Application() {
             
             addInputListeners(scene)
         }
-
-
+        
         GameLoop(canvas).start()
 
         stage.show()
