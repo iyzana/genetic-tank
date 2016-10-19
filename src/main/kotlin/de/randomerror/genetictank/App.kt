@@ -1,5 +1,7 @@
 package de.randomerror.genetictank
 
+import de.randomerror.genetictank.input.Keyboard
+import de.randomerror.genetictank.input.Mouse
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.scene.Group
@@ -16,7 +18,7 @@ class App : Application() {
         val screenBounds = Screen.getPrimary().bounds
 
         val canvas = Canvas(screenBounds.width, screenBounds.height)
-        
+
         stage.apply {
             title = "Genetic Tank"
 
@@ -27,10 +29,21 @@ class App : Application() {
             group.children += canvas
             scene = Scene(group)
         }
-        
+
+        addInputListeners(canvas)
+
         GameLoop(canvas).start()
-        
+
         stage.show()
+    }
+
+    private fun addInputListeners(canvas: Canvas) {
+        canvas.onMouseMoved = Mouse
+        canvas.onMouseDragged = Mouse
+        canvas.onMousePressed = Mouse
+        canvas.onMouseReleased = Mouse
+        canvas.onKeyPressed = Keyboard
+        canvas.onKeyReleased = Keyboard
     }
 }
 
