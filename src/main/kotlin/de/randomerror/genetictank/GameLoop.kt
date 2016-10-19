@@ -23,8 +23,8 @@ class GameLoop(val canvas: Canvas) : AnimationTimer() {
         val maxRightX = canvas.width - 100
         val maxBottomY = canvas.height - 100
 
-        var x = ((now - start) / 1000000.0) % (maxRightX * 2)
-        var y = ((now - start) / 1000000.0) % (maxBottomY * 2)
+        var x = ((now - start) / 3000000.0) % (maxRightX * 2)
+        var y = ((now - start) / 3000000.0) % (maxBottomY * 2)
 
         if (x > maxRightX) x = maxRightX - (x - maxRightX)
         if (y > maxBottomY) y = maxBottomY - (y - maxBottomY)
