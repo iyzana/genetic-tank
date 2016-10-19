@@ -5,7 +5,6 @@ import javafx.application.Application.launch
 import javafx.scene.Group
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
-import javafx.scene.paint.Color
 import javafx.stage.Screen
 import javafx.stage.Stage
 
@@ -28,6 +27,8 @@ class App : Application() {
             group.children += canvas
             scene = Scene(group)
         }
+        
+        GameLoop(canvas).start()
         
         stage.show()
     }
