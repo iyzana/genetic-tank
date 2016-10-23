@@ -1,7 +1,7 @@
 package de.randomerror.genetictank
 
 import de.randomerror.genetictank.helper.rotate
-import de.randomerror.genetictank.helper.withMatrix
+import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
 import javafx.animation.AnimationTimer
@@ -52,11 +52,11 @@ class GameLoop(val canvas: Canvas) : AnimationTimer() {
         stroke = color(0.0, x / 3000, y / 2000)
         lineWidth = x / 300
         lineJoin = ROUND
-
-        withMatrix {
+        
+        transformContext {
             translate(x, y)
 
-            withMatrix {
+            transformContext {
                 rotate(y / 3, 50.0, 50.0)
                 fillRect(0.0, 0.0, 100.0, 100.0)
             }

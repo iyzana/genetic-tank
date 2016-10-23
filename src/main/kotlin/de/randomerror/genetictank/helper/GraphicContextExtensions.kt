@@ -5,10 +5,10 @@ import javafx.scene.canvas.GraphicsContext
 /**
  * Run the provided code block on the GraphicsContext and reset the transform afterwards
  */
-fun GraphicsContext.withMatrix(block: GraphicsContext.() -> Unit) {
-    val transformCopy = transform
+fun GraphicsContext.transformContext(block: GraphicsContext.() -> Unit) {
+    save()
     block()
-    transform = transformCopy
+    restore()
 }
 
 /**
