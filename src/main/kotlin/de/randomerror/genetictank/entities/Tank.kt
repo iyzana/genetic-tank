@@ -6,6 +6,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import de.randomerror.genetictank.helper.forEach
+import de.randomerror.genetictank.helper.rotate
 
 /**
  * Created by henri on 19.10.16.
@@ -45,9 +46,7 @@ class Tank(val color: Color) : Entity() {
         transformContext {
             translate(x, y)
 
-            translate(width / 2, height / 2)
-            rotate(Math.toDegrees(heading))
-            translate(-width / 2, -height / 2)
+            rotate(Math.toDegrees(heading), width / 2, height / 2)
 
             stroke = Color(0.0, 0.0, 0.0, 1.0)
             lineWidth = 1.0
