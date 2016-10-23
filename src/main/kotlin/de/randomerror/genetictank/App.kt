@@ -48,5 +48,7 @@ class App : Application() {
 }
 
 fun main(args: Array<String>) {
+    log.info("Application start")
+    
     launch(App::class.java)
 }
