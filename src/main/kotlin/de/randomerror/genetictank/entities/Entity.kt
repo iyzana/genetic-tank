@@ -7,8 +7,8 @@ import javafx.scene.canvas.GraphicsContext
  */
 
 abstract class Entity {
-    var x = 0
-    var y = 0
+    var x = 0.0
+    var y = 0.0
 
     var velX = 0.0
     var velY = 0.0
