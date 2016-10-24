@@ -7,6 +7,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import de.randomerror.genetictank.helper.forEach
 import de.randomerror.genetictank.helper.rotate
+import java.util.*
 
 /**
  * Created by henri on 19.10.16.
@@ -25,6 +26,8 @@ class Tank(val color: Color) : Entity() {
     var heading = 0.0
     val velRotation = 2.0
 
+    val projectiles = LinkedList<Projectile>()
+
     val actions = mapOf<KeyCode, (Double) -> Unit>(
             KeyCode.W to { deltaTime ->
                 x += Math.sin(heading) * velX * deltaTime
@@ -39,6 +42,9 @@ class Tank(val color: Color) : Entity() {
             },
             KeyCode.D to { deltaTime ->
                 heading += deltaTime * velRotation
+            },
+            KeyCode.M to { deltaTime ->
+                projectiles += Projectile(x + width/2, y + height/2, heading)
             })
 
     override fun render(gc: GraphicsContext) = gc.run {
@@ -62,13 +68,16 @@ class Tank(val color: Color) : Entity() {
             fillOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
             strokeOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
         }
+
+        projectiles.forEach { it.render(gc) }
     }
 
     override fun update(deltaTime: Double) {
-        actions.forEach { key, action ->
-            if(keyDown(key))
-                action(deltaTime)
+        actions.filter { keyDown(it.key) }.forEach { key, action ->
+            action(deltaTime)
         }
+
+        projectiles.forEach { it.update(deltaTime) }
     }
 }
 

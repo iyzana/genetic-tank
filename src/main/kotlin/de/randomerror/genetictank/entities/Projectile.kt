@@ -1,19 +1,34 @@
 package de.randomerror.genetictank.entities
 
 import javafx.scene.canvas.GraphicsContext
+import javafx.scene.paint.Color
 
 /**
  * Created by henri on 19.10.16.
  */
 
-class Projectile : Entity() {
+class Projectile(x: Double, y: Double, heading: Double) : Entity() {
 
+    init {
+        this.x = x
+        this.y = y
+        velX = Math.sin(heading)*10
+        velY = -Math.cos(heading)*10
+    }
 
-    override fun render(gc: GraphicsContext) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+    val color = Color(.0, .0, .0, 1.0)
+    val radius = 2.0
+
+    override fun render(gc: GraphicsContext) = gc.run {
+
+        fill = color
+
+        fillOval(x, y, radius*2, radius*2)
+
     }
 
     override fun update(deltaTime: Double) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        x += velX
+        y += velY
     }
 }
