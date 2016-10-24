@@ -23,4 +23,8 @@ class Wall(x: Double, y: Double, val w: Double, val h: Double) : Entity() {
     override fun update(deltaTime: Double) {
         
     }
+
+    override fun toString(): String {
+        return "Wall($x, $y, $w, $h)"
+    }
 }

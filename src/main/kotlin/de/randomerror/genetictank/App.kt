@@ -1,10 +1,8 @@
 package de.randomerror.genetictank
 
-import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
-import de.randomerror.genetictank.labyrinth.Labyrinth
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.scene.Group
@@ -52,8 +50,6 @@ class App : Application() {
 
 fun main(args: Array<String>) {
     log.info("Application start")
-    
-    Labyrinth.print(Labyrinth.generate(10, 10))
 
     launch(App::class.java)
 }

@@ -1,15 +1,16 @@
 package de.randomerror.genetictank.labyrinth
 
+import de.randomerror.genetictank.entities.Wall
 import java.util.*
 
 object Labyrinth {
-    fun generate(width: Int, height: Int, random: Random = Random()): Array<Array<Boolean>> {
+    fun generate(width: Int, height: Int, random: Random = Random()): List<Wall> {
         val grid = Grid(width * 2 + 1, height * 2 + 1, random)
 
         val start = grid.randomPoint()
         generate(start, grid, random)
 
-        return grid.asBooleanArray()
+        return convertToWalls(grid)
     }
 
     fun print(labyrinth: Array<Array<Boolean>>) {
@@ -47,6 +48,23 @@ object Labyrinth {
                             grid.setPathAt(next)
                         }
                     }
+                }
+    }
+
+    private fun convertToWalls(grid: Grid): List<Wall> {
+        val tileSize = 100.0
+        val wallSize = tileSize * 0.075
+
+        return (0..grid.w - 1).flatMap { x -> (0..grid.h - 1).map { y -> Point(x, y) } }
+                .filter { grid.isWall(it) }
+                .filter { it.x % 2 == 0 || it.y % 2 == 0 }
+                .map { point ->
+                    val x = point.x / 2 * tileSize
+                    val y = point.y / 2 * tileSize
+                    val w = if(point.x % 2 == 0) wallSize else tileSize
+                    val h = if(point.y % 2 == 0) wallSize else tileSize
+
+                    Wall(x, y, w, h)
                 }
     }
 

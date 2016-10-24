@@ -5,11 +5,15 @@ import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
+import de.randomerror.genetictank.labyrinth.Labyrinth
 import javafx.animation.AnimationTimer
 import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
+import javafx.scene.paint.Color
 import javafx.scene.paint.Color.BLACK
 import javafx.scene.paint.Color.color
 import javafx.scene.shape.StrokeLineJoin.ROUND
+import java.util.Random
 
 /**
  * Created by Jannis on 19.10.16.
@@ -24,6 +28,8 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var y = 0.0
 
     val tank = Tank(Color(.5, 0.3, 0.0, 1.0))
+    
+    val walls = Labyrinth.generate(20, 20, Random(0)).apply { println(size) }
 
     override fun handle(now: Long) {
         update(now)
@@ -50,9 +56,11 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         tank.update(deltaTime)
     }
 
-    private fun render() = gc.run {
+    private fun render() = gc.transformContext {
         clearRect(0.0, 0.0, canvas.width, canvas.height)
 
+        walls.forEach { it.render(gc) }
+        
         tank.render(gc);
 
         fill = if (Mouse.isDown()) BLACK else color(x / 3000, 0.0, y / 2000)
