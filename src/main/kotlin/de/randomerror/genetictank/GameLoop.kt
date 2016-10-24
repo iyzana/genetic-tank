@@ -7,7 +7,6 @@ import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
 import javafx.animation.AnimationTimer
 import javafx.scene.canvas.Canvas
-import javafx.scene.paint.Color
 import javafx.scene.paint.Color.BLACK
 import javafx.scene.paint.Color.color
 import javafx.scene.shape.StrokeLineJoin.ROUND
@@ -15,8 +14,8 @@ import javafx.scene.shape.StrokeLineJoin.ROUND
 /**
  * Created by Jannis on 19.10.16.
  */
-class GameLoop(val canvas: Canvas) : AnimationTimer() {
-    val gc = canvas.graphicsContext2D
+class GameLoop(canvas: Canvas) : AnimationTimer() {
+    val gc: GraphicsContext = canvas.graphicsContext2D
     var previousTime = System.nanoTime()
 
     // TODO Remove this example state
@@ -38,9 +37,9 @@ class GameLoop(val canvas: Canvas) : AnimationTimer() {
         val deltaTime = (now - previousTime) / 1000000000.0;
         val fps = 1 / deltaTime
         previousTime = now
-
-        val maxRightX = canvas.width - 100
-        val maxBottomY = canvas.height - 100
+        
+        val maxRightX = gc.canvas.width - 100
+        val maxBottomY = gc.canvas.height - 100
 
         x = ((now - start) / 3000000.0) % (maxRightX * 2)
         y = ((now - start) / 3000000.0) % (maxBottomY * 2)
