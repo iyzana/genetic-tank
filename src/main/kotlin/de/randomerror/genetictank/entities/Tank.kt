@@ -13,9 +13,11 @@ import java.util.*
  * Created by henri on 19.10.16.
  */
 
-class Tank(val color: Color) : Entity() {
+class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
 
     init {
+        this.x = xPos
+        this.y = yPos
         velX = 300.0
         velY = 300.0
     }
@@ -49,23 +51,25 @@ class Tank(val color: Color) : Entity() {
 
     override fun render(gc: GraphicsContext) = gc.transformContext {
 
-        translate(x, y)
+        transformContext {
+            translate(x, y)
 
-        rotate(Math.toDegrees(heading), width / 2, height / 2)
+            rotate(Math.toDegrees(heading), width / 2, height / 2)
 
-        stroke = Color(0.0, 0.0, 0.0, 1.0)
-        lineWidth = 1.0
+            stroke = Color(0.0, 0.0, 0.0, 1.0)
+            lineWidth = 1.0
 
-        fill = color
-        fillRect(0.0, 0.0, width, height)
-        strokeRect(0.0, 0.0, width, height)
+            fill = color
+            fillRect(0.0, 0.0, width, height)
+            strokeRect(0.0, 0.0, width, height)
 
-        fill = color.brighter()
-        fillRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
-        strokeRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
+            fill = color.brighter()
+            fillRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
+            strokeRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
 
-        fillOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
-        strokeOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
+            fillOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
+            strokeOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
+        }
 
         projectiles.forEach { it.render(gc) }
     }
@@ -77,5 +81,7 @@ class Tank(val color: Color) : Entity() {
 
         projectiles.forEach { it.update(deltaTime) }
     }
+
+    override fun collides(x: Double, y: Double) = x > this.x && x < this.x+width && y > this.y && y < this.y+height
 }
 
