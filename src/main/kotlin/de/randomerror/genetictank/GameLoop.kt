@@ -18,18 +18,21 @@ import java.util.*
 class GameLoop(canvas: Canvas) : AnimationTimer() {
     var gc = canvas.graphicsContext2D
     var previousTime = System.nanoTime()
-    
+
     val translate: Pair<Double, Double>
     val scale: Double
 
     init {
+        objects += Tank(0.0, 0.0, Color.SADDLEBROWN)
+        objects += Tank(100.0, 100.0, Color.PURPLE)
+        
         val labWidth = 10
         val labHeight = 10
-        objects += Labyrinth.generate(labWidth, labHeight, Random(0)).apply { println(size) }
-        
+        objects += Labyrinth.generate(labWidth, labHeight, Random(0))
+
         val screenScale = Math.min(gc.canvas.width / 1920.0, gc.canvas.height / 1080.0)
         gc.scale(screenScale, screenScale)
-        
+
         val labScale = Math.min(10.0 / labWidth, 19.0 / labHeight)
         val labW = labWidth * 100.0 * labScale
         val labH = labHeight * 100.0 * labScale
@@ -50,28 +53,23 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         val deltaTime = (now - previousTime) / 1000000000.0;
         val fps = 1 / deltaTime
         previousTime = now
-        
+
         objects.forEach { it.update(deltaTime) }
     }
 
     private fun render() = gc.transformContext {
         clearRect(0.0, 0.0, 1920.0, 1080.0)
-        
+
         scale(scale, scale)
         val (x, y) = translate
         translate(x, y)
 
         objects.forEach { it.render(gc) }
     }
-    
+
     companion object {
         val objects = mutableListOf<Entity>()
-        
-        init {
-            objects += Tank(0.0, 0.0, Color.SADDLEBROWN)
-            objects += Tank(100.0, 100.0, Color.PURPLE)
-        }
-        
+
         fun checkCollisions(projectile: Projectile) {
             objects.filter { it.collides(projectile.x, projectile.y) }.forEach {
                 //do semthing
