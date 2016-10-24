@@ -1,4 +1,4 @@
-package de.randomerror.genetictank
+package de.randomerror.genetictank.helper
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
