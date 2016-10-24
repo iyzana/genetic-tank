@@ -1,5 +1,6 @@
 package de.randomerror.genetictank.entities
 
+import de.randomerror.genetictank.GameLoop
 import de.randomerror.genetictank.helper.transformContext
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
@@ -9,6 +10,7 @@ import javafx.scene.paint.Color
  */
 
 class Projectile(x: Double, y: Double, heading: Double) : Entity() {
+
 
     init {
         this.x = x
@@ -31,5 +33,9 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     override fun update(deltaTime: Double) {
         x += velX
         y += velY
+
+        GameLoop.checkCollisions(this);
     }
+
+    override fun collides(x: Double, y: Double) = false
 }

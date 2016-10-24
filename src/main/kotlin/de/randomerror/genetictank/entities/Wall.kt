@@ -27,4 +27,6 @@ class Wall(x: Double, y: Double, val w: Double, val h: Double) : Entity() {
     override fun toString(): String {
         return "Wall($x, $y, $w, $h)"
     }
+
+    override fun collides(x: Double, y: Double) =x > this.x && x < this.x+w && y > this.y && y < this.y+h
 }

@@ -15,4 +15,5 @@ abstract class Entity {
 
     abstract fun render(gc: GraphicsContext)
     abstract fun update(deltaTime: Double)
+    abstract fun collides(x: Double, y: Double): Boolean
 }

@@ -1,5 +1,7 @@
 package de.randomerror.genetictank
 
+import de.randomerror.genetictank.entities.Entity
+import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
@@ -13,13 +15,14 @@ import javafx.scene.paint.Color
 import javafx.scene.paint.Color.BLACK
 import javafx.scene.paint.Color.color
 import javafx.scene.shape.StrokeLineJoin.ROUND
-import java.util.Random
+import java.util.*
 
 /**
  * Created by Jannis on 19.10.16.
  */
-class GameLoop(canvas: Canvas) : AnimationTimer() {
-    val gc: GraphicsContext = canvas.graphicsContext2D
+object GameLoop : AnimationTimer() {
+
+    lateinit var gc: GraphicsContext
     var previousTime = System.nanoTime()
 
     // TODO Remove this example state
@@ -27,9 +30,12 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var x = 0.0
     var y = 0.0
 
-    val tank = Tank(Color(.5, 0.3, 0.0, 1.0))
-    
-    val walls = Labyrinth.generate(20, 20, Random(0)).apply { println(size) }
+    val objects = listOf(Tank(.0, .0, Color(.5, 0.3, 0.0, 1.0)), Tank(20.0, 20.0, Color(.5, 0.3, 0.8, 1.0))) + Labyrinth.generate(20, 20, Random(0)).apply { println(size) }
+
+    operator fun invoke(canvas: Canvas): GameLoop {
+        gc = canvas.graphicsContext2D
+        return this
+    }
 
     override fun handle(now: Long) {
         update(now)
@@ -43,7 +49,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         val deltaTime = (now - previousTime) / 1000000000.0;
         val fps = 1 / deltaTime
         previousTime = now
-        
+
         val maxRightX = gc.canvas.width - 100
         val maxBottomY = gc.canvas.height - 100
 
@@ -53,21 +59,19 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         if (x > maxRightX) x = maxRightX - (x - maxRightX)
         if (y > maxBottomY) y = maxBottomY - (y - maxBottomY)
 
-        tank.update(deltaTime)
+        objects.forEach { it.update(deltaTime) }
     }
 
     private fun render() = gc.transformContext {
         clearRect(0.0, 0.0, canvas.width, canvas.height)
 
-        walls.forEach { it.render(gc) }
-        
-        tank.render(gc);
+        objects.forEach { it.render(gc) }
 
         fill = if (Mouse.isDown()) BLACK else color(x / 3000, 0.0, y / 2000)
         stroke = color(0.0, x / 3000, y / 2000)
         lineWidth = x / 300
         lineJoin = ROUND
-        
+
         transformContext {
             translate(x, y)
 
@@ -77,6 +81,12 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
             }
 
             strokeRect(0.0, 0.0, 100.0, 100.0)
+        }
+    }
+
+    fun checkCollisions(projectile: Projectile) {
+        objects.filter { it.collides(projectile.x, projectile.y) }.forEach {
+            //do semthing
         }
     }
 }
