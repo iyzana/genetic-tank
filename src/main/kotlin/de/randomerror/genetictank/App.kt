@@ -1,5 +1,6 @@
 package de.randomerror.genetictank
 
+import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
@@ -53,6 +54,6 @@ fun main(args: Array<String>) {
     log.info("Application start")
     
     Labyrinth.print(Labyrinth.generate(10, 10))
-    
+
     launch(App::class.java)
 }

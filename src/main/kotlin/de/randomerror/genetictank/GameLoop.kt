@@ -1,11 +1,13 @@
 package de.randomerror.genetictank
 
+import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
 import javafx.animation.AnimationTimer
 import javafx.scene.canvas.Canvas
+import javafx.scene.paint.Color
 import javafx.scene.paint.Color.BLACK
 import javafx.scene.paint.Color.color
 import javafx.scene.shape.StrokeLineJoin.ROUND
@@ -21,6 +23,8 @@ class GameLoop(val canvas: Canvas) : AnimationTimer() {
     val start = System.nanoTime()
     var x = 0.0
     var y = 0.0
+
+    val tank = Tank(Color(.5, 0.3, 0.0, 1.0))
 
     override fun handle(now: Long) {
         update(now)
@@ -43,10 +47,14 @@ class GameLoop(val canvas: Canvas) : AnimationTimer() {
 
         if (x > maxRightX) x = maxRightX - (x - maxRightX)
         if (y > maxBottomY) y = maxBottomY - (y - maxBottomY)
+
+        tank.update(deltaTime)
     }
 
     private fun render() = gc.run {
         clearRect(0.0, 0.0, canvas.width, canvas.height)
+
+        tank.render(gc);
 
         fill = if (Mouse.isDown()) BLACK else color(x / 3000, 0.0, y / 2000)
         stroke = color(0.0, x / 3000, y / 2000)
