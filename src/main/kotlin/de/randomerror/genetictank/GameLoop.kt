@@ -8,6 +8,7 @@ import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
 import de.randomerror.genetictank.labyrinth.Labyrinth
 import javafx.animation.AnimationTimer
+import javafx.geometry.Point2D
 import javafx.scene.canvas.Canvas
 import javafx.scene.paint.Color
 import java.util.*
@@ -19,7 +20,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var gc = canvas.graphicsContext2D
     var previousTime = System.nanoTime()
 
-    val translate: Pair<Double, Double>
+    val translate: Point2D
     val scale: Double
 
     init {
@@ -37,7 +38,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         val labW = labWidth * 100.0 * labScale
         val labH = labHeight * 100.0 * labScale
 
-        translate = (1920 - labW) / 2 to (1080 - labH) / 2
+        translate = Point2D((1920 - labW) / 2, (1080 - labH) / 2)
         scale = labScale
     }
 
@@ -61,8 +62,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         clearRect(0.0, 0.0, 1920.0, 1080.0)
 
         scale(scale, scale)
-        val (x, y) = translate
-        translate(x, y)
+        translate(translate.x, translate.y)
 
         objects.forEach { it.render(gc) }
     }
