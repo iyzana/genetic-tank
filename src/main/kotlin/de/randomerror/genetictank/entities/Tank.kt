@@ -1,12 +1,12 @@
 package de.randomerror.genetictank.entities
 
+import de.randomerror.genetictank.helper.forEach
+import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard.keyDown
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
-import de.randomerror.genetictank.helper.forEach
-import de.randomerror.genetictank.helper.rotate
 import java.util.*
 
 /**
@@ -18,15 +18,15 @@ class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
     init {
         this.x = xPos
         this.y = yPos
-        velX = 300.0
-        velY = 300.0
+        velX = 200.0
+        velY = 200.0
     }
 
     val width = 30.0
     val height = 50.0
 
     var heading = 0.0
-    val velRotation = 2.0
+    val velRotation = 4.0
 
     val projectiles = LinkedList<Projectile>()
 
@@ -82,6 +82,5 @@ class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
         projectiles.forEach { it.update(deltaTime) }
     }
 
-    override fun collides(x: Double, y: Double) = x > this.x && x < this.x+width && y > this.y && y < this.y+height
+    override fun collides(x: Double, y: Double) = x > this.x && x < this.x + width && y > this.y && y < this.y + height
 }
-

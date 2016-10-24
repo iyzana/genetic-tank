@@ -35,7 +35,7 @@ object Labyrinth {
                         grid.setPathAt((current + next) / 2)
 
                         generate(next, grid, random)
-                    } else if (random.nextDouble() < 0.1) { // allow break through walls occasionally
+                    } else if (random.nextDouble() < 0.2) { // allow break through walls occasionally
                         // ensure the breakthrough does not introduce a mini circle or a single dot wall
                         val move = next - current
                         val sideR = current + move.rotatedRight() + move / 2

@@ -65,7 +65,12 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     }
     
     companion object {
-        val objects = mutableListOf<Entity>(Tank(.0, .0, Color(.5, 0.3, 0.0, 1.0)), Tank(20.0, 20.0, Color(.5, 0.3, 0.8, 1.0)))
+        val objects = mutableListOf<Entity>()
+        
+        init {
+            objects += Tank(0.0, 0.0, Color.SADDLEBROWN)
+            objects += Tank(100.0, 100.0, Color.PURPLE)
+        }
         
         fun checkCollisions(projectile: Projectile) {
             objects.filter { it.collides(projectile.x, projectile.y) }.forEach {
