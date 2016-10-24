@@ -1,5 +1,6 @@
 package de.randomerror.genetictank.entities
 
+import de.randomerror.genetictank.helper.transformContext
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 
@@ -19,7 +20,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     val color = Color(.0, .0, .0, 1.0)
     val radius = 2.0
 
-    override fun render(gc: GraphicsContext) = gc.run {
+    override fun render(gc: GraphicsContext) = gc.transformContext {
 
         fill = color
 

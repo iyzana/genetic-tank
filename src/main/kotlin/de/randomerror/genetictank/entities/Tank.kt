@@ -44,30 +44,28 @@ class Tank(val color: Color) : Entity() {
                 heading += deltaTime * velRotation
             },
             KeyCode.M to { deltaTime ->
-                projectiles += Projectile(x + width/2, y + height/2, heading)
+                projectiles += Projectile(x + width / 2, y + height / 2, heading)
             })
 
-    override fun render(gc: GraphicsContext) = gc.run {
+    override fun render(gc: GraphicsContext) = gc.transformContext {
 
-        transformContext {
-            translate(x, y)
+        translate(x, y)
 
-            rotate(Math.toDegrees(heading), width / 2, height / 2)
+        rotate(Math.toDegrees(heading), width / 2, height / 2)
 
-            stroke = Color(0.0, 0.0, 0.0, 1.0)
-            lineWidth = 1.0
+        stroke = Color(0.0, 0.0, 0.0, 1.0)
+        lineWidth = 1.0
 
-            fill = color
-            fillRect(0.0, 0.0, width, height)
-            strokeRect(0.0, 0.0, width, height)
+        fill = color
+        fillRect(0.0, 0.0, width, height)
+        strokeRect(0.0, 0.0, width, height)
 
-            fill = color.brighter()
-            fillRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
-            strokeRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
+        fill = color.brighter()
+        fillRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
+        strokeRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
 
-            fillOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
-            strokeOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
-        }
+        fillOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
+        strokeOval(0.1 * width, (height - 0.8 * width) / 2, 0.8 * width, 0.8 * width)
 
         projectiles.forEach { it.render(gc) }
     }
