@@ -2,6 +2,7 @@ package de.randomerror.genetictank.entities
 
 import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
+import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Keyboard.keyDown
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.input.KeyCode
@@ -77,6 +78,11 @@ class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
         actions.filter { keyDown(it.key) }.forEach { key, action ->
             action(deltaTime)
         }
+
+        if(Keyboard.keyDown(KeyCode.C))
+            projectiles.clear()
+        while (projectiles.size > 1)
+            projectiles.removeLast()
 
         projectiles.forEach { it.update(deltaTime) }
     }

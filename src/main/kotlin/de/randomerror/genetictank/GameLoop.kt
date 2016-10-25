@@ -28,8 +28,8 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         objects += Tank(0.0, 0.0, Color.SADDLEBROWN)
 //        objects += Tank(100.0, 100.0, Color.PURPLE)
         
-        val labWidth = 8
-        val labHeight = 8
+        val labWidth = 10
+        val labHeight = 10
         objects += Labyrinth.generate(labWidth, labHeight, Random(1))
 
         val screenScale = Math.min(gc.canvas.width / 1920.0, gc.canvas.height / 1080.0)
@@ -51,12 +51,11 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         Keyboard.poll()
 
         val deltaTime = (now - previousTime) / 1000000000.0
+        val updateDelta = Math.min(deltaTime, 1.0 / 40.0)
+        
         fps = (fps * 20 + 1 / deltaTime) / 21
         previousTime = now
         
-        val updateDelta = Math.min(deltaTime, 1.0 / 40.0)
-        ups = (ups * 20 + 1 / updateDelta) / 21
-
         objects.forEach { it.update(updateDelta) }
     }
 
@@ -64,7 +63,6 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         clearRect(0.0, 0.0, 1920.0, 1080.0)
         
         fillText("fps: ${fps.toInt()}", 10.0, 20.0)
-        fillText("ups: ${ups.toInt()}", 10.0, 40.0)
 
         gc.transformContext {
             translate(translate.x, translate.y)
