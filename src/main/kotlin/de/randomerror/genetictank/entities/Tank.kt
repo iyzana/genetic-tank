@@ -1,6 +1,5 @@
 package de.randomerror.genetictank.entities
 
-import de.randomerror.genetictank.helper.forEach
 import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard.keyDown

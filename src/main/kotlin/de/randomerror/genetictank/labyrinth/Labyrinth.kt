@@ -52,8 +52,6 @@ object Labyrinth {
     }
 
     private fun convertToWalls(grid: Grid): List<Wall> {
-        val tileSize = 100.0
-        val wallSize = tileSize * 0.075
 
         return (0..grid.w - 1).flatMap { x -> (0..grid.h - 1).map { y -> Point(x, y) } }
                 .filter { grid.isWall(it) }
@@ -61,12 +59,19 @@ object Labyrinth {
                 .map { point ->
                     val x = point.x / 2 * tileSize
                     val y = point.y / 2 * tileSize
-                    val w = if(point.x % 2 == 0) wallSize else tileSize
-                    val h = if(point.y % 2 == 0) wallSize else tileSize
+                    val w = if (point.x % 2 == 0) wallSize else tileSize
+                    val h = if (point.y % 2 == 0) wallSize else tileSize
 
                     Wall(x, y, w, h)
                 }
     }
+
+    fun getRealSize(width: Int, height: Int): Pair<Double, Double> {
+        return width * tileSize + wallSize to height * tileSize + wallSize
+    }
+
+    private val tileSize = 100.0
+    private val wallSize = tileSize * 0.075
 
     private val up = Point(0, -2)
     private val down = Point(0, 2)
