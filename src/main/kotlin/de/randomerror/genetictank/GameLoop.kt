@@ -25,12 +25,12 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var ups = 0.0
 
     init {
-        objects += Tank(0.0, 0.0, Color.SADDLEBROWN)
-//        objects += Tank(100.0, 100.0, Color.PURPLE)
-        
+        entities += Tank(0.0, 0.0, Color.SADDLEBROWN)
+//        entities += Tank(100.0, 100.0, Color.PURPLE)
+
         val labWidth = 10
         val labHeight = 10
-        objects += Labyrinth.generate(labWidth, labHeight, Random(1))
+        entities += Labyrinth.generate(labWidth, labHeight, Random(1))
 
         val screenScale = Math.min(gc.canvas.width / 1920.0, gc.canvas.height / 1080.0)
         gc.scale(screenScale, screenScale)
@@ -52,27 +52,27 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
 
         val deltaTime = (now - previousTime) / 1000000000.0
         val updateDelta = Math.min(deltaTime, 1.0 / 40.0)
-        
+
         fps = (fps * 20 + 1 / deltaTime) / 21
         previousTime = now
         
-        objects.forEach { it.update(updateDelta) }
+        entities.toList().forEach { it.update(updateDelta) }
     }
 
     private fun render() = gc.transformContext {
         clearRect(0.0, 0.0, 1920.0, 1080.0)
-        
+
         fillText("fps: ${fps.toInt()}", 10.0, 20.0)
 
         gc.transformContext {
             translate(translate.x, translate.y)
             scale(scale, scale)
 
-            objects.forEach { it.render(gc) }
+            entities.forEach { it.render(gc) }
         }
     }
 
     companion object {
-        val objects = mutableListOf<Entity>()
+        val entities = mutableListOf<Entity>()
     }
 }

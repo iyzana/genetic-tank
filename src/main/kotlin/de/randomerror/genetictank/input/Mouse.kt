@@ -44,7 +44,7 @@ object Mouse : EventHandler<MouseEvent> {
     }
 
     fun isUp(button: MouseButton = MouseButton.PRIMARY, once: Boolean = false): Boolean {
-        return currentState[button] == ButtonState.RELEASED || !once && currentState[button] == ButtonState.UP
+        return !currentState.containsKey(button) || currentState[button] == ButtonState.RELEASED || !once && currentState[button] == ButtonState.UP
     }
 
     fun getPos() = currentPosition

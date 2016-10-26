@@ -12,7 +12,7 @@ import javafx.scene.paint.Color
  */
 class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     val color = Color(.0, .0, .0, 1.0)
-    val radius = 2.0
+    val radius = 3.0
 
     var alive = true
 
@@ -43,31 +43,37 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
         val newX = x + velX * deltaTime * 1.5
         val newY = y + velY * deltaTime * 1.5
 
-        val walls = GameLoop.objects
+        val walls = GameLoop.entities
                 .filter { it is Wall }
                 .map { it as Wall }
                 .filter { it.collides(newX + radius, curY + radius) || it.collides(curX + radius, newY + radius) }
 
         walls.firstOrNull { it.collides(newX + radius, curY + radius) }?.let { wall ->
             velX = -velX
-            
-            x = if (x < wall.x + wall.w / 2)
-                wall.x - radius
+
+            x = if (x + radius < wall.x + wall.w / 2)
+                wall.x - radius * 2
             else
-                wall.x + wall.w + radius
+                wall.x + wall.w
         }
 
         walls.firstOrNull { it.collides(curX + radius, newY + radius) }?.let { wall ->
             velY = -velY
-            
-            y = if (y < wall.y + wall.h / 2)
-                wall.y - radius
+
+            y = if (y + radius < wall.y + wall.h / 2)
+                wall.y - radius * 2
             else
-                wall.y + wall.h + radius
+                wall.y + wall.h
         }
 
         x += velX * deltaTime
         y += velY * deltaTime
+
+        GameLoop.entities
+                .filter { it is Tank }
+                .map { it as Tank }
+                .filter { it.collides(x, y) }
+                .forEach { alive = false }
     }
 
     override fun collides(x: Double, y: Double) = false

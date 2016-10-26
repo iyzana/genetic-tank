@@ -29,7 +29,6 @@ object Labyrinth {
                 .map { current + it }
                 .filter { it in grid }
                 .shuffled(random)
-                .asSequence()
                 .forEach { next ->
                     if (grid.isWall(next)) {
                         grid.setPathAt((current + next) / 2)

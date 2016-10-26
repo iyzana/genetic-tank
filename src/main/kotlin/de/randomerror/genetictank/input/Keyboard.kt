@@ -27,7 +27,7 @@ object Keyboard : EventHandler<KeyEvent> {
 
         actualState.forEach { key, pressed ->
             if (pressed) {
-                if (currentState[key] == KeyState.RELEASED)
+                if (!currentState.containsKey(key) || currentState[key] == KeyState.RELEASED)
                     currentState[key] = KeyState.ONCE
                 else
                     currentState[key] = KeyState.PRESSED
