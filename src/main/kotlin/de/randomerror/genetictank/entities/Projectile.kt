@@ -51,19 +51,19 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
         walls.firstOrNull { it.collides(newX + radius, curY + radius) }?.let { wall ->
             velX = -velX
 
-            x = if (x + radius < wall.x + wall.w / 2)
+            x = if (x + radius < wall.x + wall.width / 2)
                 wall.x - radius * 2
             else
-                wall.x + wall.w
+                wall.x + wall.width
         }
 
         walls.firstOrNull { it.collides(curX + radius, newY + radius) }?.let { wall ->
             velY = -velY
 
-            y = if (y + radius < wall.y + wall.h / 2)
+            y = if (y + radius < wall.y + wall.height / 2)
                 wall.y - radius * 2
             else
-                wall.y + wall.h
+                wall.y + wall.height
         }
 
         x += velX * deltaTime
@@ -72,7 +72,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
         GameLoop.entities
                 .filter { it is Tank }
                 .map { it as Tank }
-                .filter { it.collides(x, y) }
+                .filter { it.collides(x + radius, y + radius) }
                 .forEach { alive = false }
     }
 

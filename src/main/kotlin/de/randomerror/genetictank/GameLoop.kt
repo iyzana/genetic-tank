@@ -25,8 +25,8 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var ups = 0.0
 
     init {
-        entities += Tank(0.0, 0.0, Color.SADDLEBROWN)
-//        entities += Tank(100.0, 100.0, Color.PURPLE)
+        entities += Tank(50.0, 50.0, Color.SADDLEBROWN)
+//        entities += Tank(150.0, 150.0, Color.PURPLE)
 
         val labWidth = 10
         val labHeight = 10
