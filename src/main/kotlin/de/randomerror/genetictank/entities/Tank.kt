@@ -1,7 +1,6 @@
 package de.randomerror.genetictank.entities
 
 import de.randomerror.genetictank.GameLoop
-import de.randomerror.genetictank.helper.RotatedRectangle
 import de.randomerror.genetictank.helper.getBounds
 import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
@@ -13,7 +12,6 @@ import javafx.scene.paint.Color
 /**
  * Created by henri on 19.10.16.
  */
-
 class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
 
     init {
@@ -77,26 +75,12 @@ class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
     override fun update(deltaTime: Double) {
         if (!alive) return
 
-//        actions.filter { keyDown(it.key) }.forEach { key, action ->
-//            action(deltaTime)
-//        }
-
         val forward = keyDown(KeyCode.W)
         val backward = keyDown(KeyCode.S)
         val left = keyDown(KeyCode.A)
         val right = keyDown(KeyCode.D)
-
-        if ((forward xor backward) || (left xor right)) {
-            if (!collideAndMove(deltaTime, forward, backward, left, right, 1.5, 1.5)) {
-                if ((left xor right)) {
-                    if (!collideAndMove(deltaTime, true, false, left, right, 10.0, 4.0))
-                        collideAndMove(deltaTime, false, true, left, right, 10.0, 4.0)
-                } else if (!(left || right) && (forward xor backward)) {
-                    if (!collideAndMove(deltaTime, forward, backward, true, false, 4.0, 6.0))
-                        collideAndMove(deltaTime, forward, backward, false, true, 4.0, 6.0)
-                }
-            }
-        }
+        
+        
 
         if (keyDown(KeyCode.M, once = true)) {
             val px = x + width / 2 + Math.sin(heading) * (height * 2 / 3)
@@ -108,41 +92,30 @@ class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
             GameLoop.entities.removeAll { it is Projectile }
     }
 
-    private fun collideAndMove(deltaTime: Double, forward: Boolean, backward: Boolean, left: Boolean, right: Boolean, testLengthMove: Double, testLengthRotate: Double): Boolean {
-        val attemptedRotation = if (left && !right) {
-            -velRotation
-        } else if (right && !left) {
-            velRotation
-        } else 0.0
+    private fun getNewPosition(deltaTime: Double): Triple<Double, Double, Double> {
+        val (velX, velY, velH) = getAttemptedMove()
 
-        val (attemptedVelX, attemptedVelY) = if (forward && !backward) {
+        val testX = x + velX * deltaTime
+        val testY = y + velY * deltaTime
+        val testH = heading + velH * deltaTime
+
+        return Triple(testX, testY, testH)
+    }
+
+    private fun getAttemptedMove(): Triple<Double, Double, Double> {
+        val (attemptedVelX, attemptedVelY) = if (keyDown(KeyCode.W) && !keyDown(KeyCode.S)) {
             velocity * Math.sin(heading) to -velocity * Math.cos(heading)
-        } else if (backward && !forward) {
+        } else if (keyDown(KeyCode.S) && !keyDown(KeyCode.W)) {
             -velocity * Math.sin(heading) to velocity * Math.cos(heading)
         } else 0.0 to 0.0
 
-        val testX = x + attemptedVelX * deltaTime * testLengthMove
-        val testY = y + attemptedVelY * deltaTime * testLengthMove
-        val testH = heading + attemptedRotation * deltaTime * testLengthRotate
+        val attemptedRotation = if (keyDown(KeyCode.A) && !keyDown(KeyCode.D)) {
+            -velRotation
+        } else if (keyDown(KeyCode.D) && !keyDown(KeyCode.A)) {
+            velRotation
+        } else 0.0
 
-        val walls = GameLoop.entities
-                .filter { it is Wall }
-                .map { it as Wall }
-
-        val newBoundsHeading = RotatedRectangle(x, y, width, height, testH)
-        val rotationPossible = walls.none { newBoundsHeading.collidesWith(it.bounds) } && attemptedRotation != 0.0
-        if (rotationPossible) {
-            heading += attemptedRotation * deltaTime
-        }
-
-        val newBoundsMovement = RotatedRectangle(testX, testY, width, height, if (rotationPossible) testH else heading)
-        val movementPossible = walls.none { newBoundsMovement.collidesWith(it.bounds) } && (attemptedVelX != 0.0 || attemptedVelY != 0.0)
-        if (movementPossible) {
-            x += attemptedVelX * deltaTime
-            y += attemptedVelY * deltaTime
-        }
-
-        return rotationPossible || movementPossible
+        return Triple(attemptedVelX, attemptedVelY, attemptedRotation)
     }
 
     override fun collides(x: Double, y: Double) = getBounds().collidesWith(x, y)
