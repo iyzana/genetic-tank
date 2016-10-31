@@ -21,7 +21,10 @@ class RotatedRectangle(var x: Double, var y: Double, var width: Double, var heig
             createTransformedArea(AffineTransform.getRotateInstance(rotation, bounds.centerX, bounds.centerY))
         }
     val outline: Rectangle
-        get() = Rectangle(area.bounds2D.x, area.bounds2D.y, area.bounds2D.width, area.bounds2D.height)
+        get() {
+            val bounds = area.bounds2D
+            return Rectangle(bounds.x, bounds.y, bounds.width, bounds.height)
+        }
 
     fun collidesWith(x: Double, y: Double) = area.contains(x, y)
 
