@@ -10,9 +10,9 @@ internal class Grid(val w: Int, val h: Int, val random: Random) {
     
     val data = Array(w) { x -> Array(h) { y -> Type.WALL } }
 
-    fun isWall(p: Point) = data[p.x][p.y] == Type.WALL
+    fun isWall(p: Point) = if(p in this) data[p.x][p.y] == Type.WALL else false
 
-    fun isPath(p: Point) = data[p.x][p.y] == Type.PATH
+    fun isPath(p: Point) = if(p in this) data[p.x][p.y] == Type.PATH else false
 
     fun setPathAt(p: Point) {
         data[p.x][p.y] = Type.PATH

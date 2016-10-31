@@ -30,6 +30,9 @@ class App : Application() {
             group.children += canvas
             scene = Scene(group)
             
+            scene.widthProperty().addListener { observable, oldValue, newValue -> canvas.width = newValue.toDouble() }
+            scene.heightProperty().addListener { observable, oldValue, newValue -> canvas.height = newValue.toDouble() }
+            
             addInputListeners(scene)
         }
         

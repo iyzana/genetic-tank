@@ -54,7 +54,15 @@ object Labyrinth {
 
         return (0..grid.w - 1).flatMap { x -> (0..grid.h - 1).map { y -> Point(x, y) } }
                 .filter { grid.isWall(it) }
-                .filter { it.x % 2 == 0 || it.y % 2 == 0 }
+                // filter all walls that are dot-like and would be contained in a larger wall to their right or bottom
+                .filter { point ->
+                    if (point.x % 2 != 0 || point.y % 2 != 0) return@filter true
+
+                    val rightWall = point + Point(1, 0)
+                    val bottomWall = point + Point(0, 1)
+
+                    return@filter !(grid.isWall(rightWall) || grid.isWall(bottomWall))
+                }
                 .map { point ->
                     val x = point.x / 2 * tileSize
                     val y = point.y / 2 * tileSize

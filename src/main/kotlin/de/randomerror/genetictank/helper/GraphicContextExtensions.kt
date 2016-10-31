@@ -1,5 +1,6 @@
 package de.randomerror.genetictank.helper
 
+import de.randomerror.genetictank.entities.Entity
 import javafx.scene.canvas.GraphicsContext
 
 /**
@@ -19,3 +20,5 @@ fun GraphicsContext.rotate(degrees: Double, x: Double, y: Double) {
     rotate(degrees)
     translate(-x, -y)
 }
+
+fun GraphicsContext.render(entity: Entity) = entity.render(this)

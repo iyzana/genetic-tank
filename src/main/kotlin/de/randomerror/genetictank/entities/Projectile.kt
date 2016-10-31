@@ -40,8 +40,8 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
 
         val curX = x
         val curY = y
-        val newX = x + velX * deltaTime * 1.5
-        val newY = y + velY * deltaTime * 1.5
+        val newX = x + velX * deltaTime
+        val newY = y + velY * deltaTime 
 
         val walls = GameLoop.entities
                 .filter { it is Wall }
@@ -65,10 +65,10 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
             else
                 wall.y + wall.height
         }
-
+        
         x += velX * deltaTime
         y += velY * deltaTime
-
+        
         GameLoop.entities
                 .filter { it is Tank }
                 .map { it as Tank }
