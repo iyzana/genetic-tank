@@ -31,6 +31,13 @@ class RotatedRectangle(var x: Double, var y: Double, var width: Double, var heig
             !isEmpty
         }
     }
+
+    fun collisionArea(other: Rectangle): Rectangle {
+        return Area(area).run {
+            intersect(other.area)
+            Rectangle(bounds2D.x, bounds2D.y, bounds2D.width, bounds2D.height)
+        }
+    }
 }
 
 fun Tank.getBounds() = RotatedRectangle(x, y, width, height, heading)
