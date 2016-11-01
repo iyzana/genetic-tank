@@ -15,36 +15,53 @@ import java.util.*
 
 object Trainer {
 
-    val pokemons = LinkedList<ASI>()
+    var pokemons: MutableList<ASI> = LinkedList<ASI>()
     val numPokemons = 1000
 
     val deltaTime = 0.016
 
     init {
         (0 until numPokemons).forEach {
-            pokemons += ASI(listOf(47, 15, 5))
+            pokemons.add(ASI(listOf(47, 15, 5)))
         }
-        GameLoop.entities += LabyrinthGenerator.generate(10,10).asWalls()
+        GameLoop.entities += LabyrinthGenerator.generate(10,10, Random(1)).asWalls()
     }
 
-    fun evolve() {
-        pokemons.forEach {
-            train(it)
+    fun evolve(): List<ASI> {
+        val fitness = pokemons.map { pokemon ->
+            val fit = train(pokemon)
+            println(fit)
+            pokemon to fit
+        }.sortedByDescending { it.second }
+
+        println("best: " + fitness.first().second)
+
+        val survivors = fitness.take((numPokemons*0.2).toInt()).map { it.first }.toMutableList()
+        (0..(numPokemons-survivors.size)).forEach {
+            survivors += ASI(listOf(47, 15, 5))
         }
+
+        pokemons = survivors
+
+        GameLoop.entities.clear()
+
+        return survivors
     }
 
 
 
     fun train(pokemon: ASI): Double {
-        val enemy = Tank(0.0, 0.0, Color.BLACK, HumanPlayer())
-        val body = Tank(0.0, 0.0, Color.ALICEBLUE, pokemon)
+        GameLoop.entities.clear()
+        GameLoop.entities += LabyrinthGenerator.generate(10,10, Random(1)).asWalls()
+        val enemy = Tank(500.0, 500.0, Color.BLACK, TrainingAI())
+        val body = Tank(50.0, 10.0, Color.ALICEBLUE, pokemon)
         var time = 0.0;
 
         GameLoop.entities += enemy
         GameLoop.entities += body
 
         do {
-            GameLoop.entities.forEach { it.update(deltaTime) }
+            GameLoop.entities.toList().forEach { it.update(deltaTime) }
             time += deltaTime
         } while (enemy.alive && body.alive && time < 60)
 

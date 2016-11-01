@@ -6,6 +6,8 @@ import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.entities.Wall
 import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.HumanPlayer
+import de.randomerror.genetictank.genetic.Trainer
+import de.randomerror.genetictank.genetic.TrainingAI
 import de.randomerror.genetictank.helper.render
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
@@ -32,7 +34,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var fps = 0.0
     var ups = 0.0
 
-    var KI = Tank(150.0, 10.0, Color.ALICEBLUE, ASI(listOf(45, 15, 5)))
+    var KI = Tank(150.0, 50.0, Color.ALICEBLUE, Trainer.evolve().first())
 
     init {
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
@@ -76,7 +78,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
             GameLoop.entities.removeAll { it is Projectile }
-        if (keyDown(KeyCode.T, once = true) || !KI.alive) {
+        if (keyDown(KeyCode.T, once = true)) {
             GameLoop.entities.removeAll { it is Projectile }
             entities -= KI
             KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(45, 15, 5)))
