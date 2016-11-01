@@ -78,7 +78,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
             GameLoop.entities.removeAll { it is Projectile }
         if (keyDown(KeyCode.T, once = true)) {
             entities -= KI
-            KI = Tank(150.0, 50.0, Color.ALICEBLUE, ASI(listOf(45, 15, 5)))
+            KI = Tank(150.0, 50.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(45, 15, 5)))
             entities += KI
         }
 
