@@ -1,7 +1,6 @@
 package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.GameLoop
-import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.helper.Matrix
@@ -41,14 +40,14 @@ class ASI(val layers: List<Int>) : Player {
         time += deltaTime
     }
 
-    override fun forward() = stateOfMind.data[0][0] > 0
+    override fun forward() = stateOfMind.data[0][0] > 0.5
 
-    override fun backward() = stateOfMind.data[0][1] > 0
+    override fun backward() = stateOfMind.data[0][1] > 0.5
 
-    override fun turnRight() = stateOfMind.data[0][2] > 0
+    override fun turnRight() = stateOfMind.data[0][2] > 0.5
 
-    override fun turnLeft() = stateOfMind.data[0][3] > 0
+    override fun turnLeft() = stateOfMind.data[0][3] > 0.5
 
-    override fun shoot() = stateOfMind.data[0][4] > 0
+    override fun shoot() = stateOfMind.data[0][4] > 0.5
 
 }

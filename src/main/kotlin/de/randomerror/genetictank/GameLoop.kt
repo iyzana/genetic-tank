@@ -23,7 +23,7 @@ import java.util.*
 class GameLoop(canvas: Canvas) : AnimationTimer() {
     var gc = canvas.graphicsContext2D
     var previousTime = System.nanoTime()
-    
+
     var labyrinth: Labyrinth
 
     var translate: Point2D = Point2D(0.0, 0.0)
@@ -32,13 +32,13 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var fps = 0.0
     var ups = 0.0
 
-    var KI = Tank(150.0, 50.0, Color.ALICEBLUE, ASI(listOf(45, 15, 5)))
+    var KI = Tank(150.0, 10.0, Color.ALICEBLUE, ASI(listOf(45, 15, 5)))
 
     init {
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
 
-        entities += Tank(50.0, 50.0, Color.SADDLEBROWN, HumanPlayer())
+        entities += Tank(50.0, 10.0, Color.SADDLEBROWN, HumanPlayer())
         entities += KI
 
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
@@ -76,9 +76,10 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
             GameLoop.entities.removeAll { it is Projectile }
-        if (keyDown(KeyCode.T, once = true)) {
+        if (keyDown(KeyCode.T, once = true) || !KI.alive) {
+            GameLoop.entities.removeAll { it is Projectile }
             entities -= KI
-            KI = Tank(150.0, 50.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(45, 15, 5)))
+            KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(45, 15, 5)))
             entities += KI
         }
 
@@ -93,13 +94,13 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
 
     private fun render() = gc.transformContext {
         clearRect(0.0, 0.0, canvas.width, canvas.height)
-        
+
         fillText("fps: ${fps.toInt()}", 10.0, 20.0)
 
         transformContext {
             translate(translate.x, translate.y)
             scale(scale, scale)
-            
+
             entities.asReversed().forEach { render(it) }
         }
     }

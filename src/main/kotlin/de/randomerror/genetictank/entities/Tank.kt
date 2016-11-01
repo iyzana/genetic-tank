@@ -28,6 +28,8 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
     val height = 50.0
 
     var alive = true
+    
+    var bullets = 0
 
     override fun render(gc: GraphicsContext) = gc.transformContext {
         if (!alive) return@transformContext
@@ -102,10 +104,11 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         y += velY * deltaTime
         heading += velH * deltaTime
 
-        if (player.shoot()) {
+        if (bullets < 5 && player.shoot()) {
             val px = x + width / 2 + Math.sin(heading) * (height / 2)
             val py = y + height / 2 - Math.cos(heading) * (height / 2)
             GameLoop.entities += Projectile(px, py, heading)
+            bullets++
         }
     }
 

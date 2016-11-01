@@ -1,6 +1,7 @@
 package de.randomerror.genetictank.entities
 
 import de.randomerror.genetictank.GameLoop
+import de.randomerror.genetictank.genetic.HumanPlayer
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
 import javafx.scene.canvas.GraphicsContext
@@ -73,7 +74,8 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
                 .filter { it is Tank }
                 .map { it as Tank }
                 .filter { it.collides(x + radius, y + radius) }
-                .forEach { alive = false }
+                .filter { it.player !is HumanPlayer }
+                .forEach { it.alive = false }
     }
 
     override fun collides(x: Double, y: Double) = false
