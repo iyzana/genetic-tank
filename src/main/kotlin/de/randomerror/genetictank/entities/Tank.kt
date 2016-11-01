@@ -1,19 +1,18 @@
 package de.randomerror.genetictank.entities
 
 import de.randomerror.genetictank.GameLoop
+import de.randomerror.genetictank.genetic.Player
 import de.randomerror.genetictank.helper.RotatedRectangle
 import de.randomerror.genetictank.helper.getBounds
 import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
-import de.randomerror.genetictank.input.Keyboard.keyDown
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 
 /**
  * Created by henri on 19.10.16.
  */
-class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
+class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : Entity() {
 
     init {
         this.x = xPos
@@ -101,7 +100,7 @@ class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
         y += velY * deltaTime
         heading += velH * deltaTime
 
-        if (keyDown(KeyCode.M, once = true)) {
+        if (player.shoot()) {
             val px = x + width / 2 + Math.sin(heading) * (height / 2)
             val py = y + height / 2 - Math.cos(heading) * (height / 2)
             GameLoop.entities += Projectile(px, py, heading)
@@ -119,15 +118,15 @@ class Tank(xPos: Double, yPos: Double, val color: Color) : Entity() {
     }
 
     private fun getAttemptedMove(): Triple<Double, Double, Double> {
-        val (attemptedVelX, attemptedVelY) = if (keyDown(KeyCode.W) && !keyDown(KeyCode.S)) {
+        val (attemptedVelX, attemptedVelY) = if (player.forward() && !player.backward()) {
             velocity * Math.sin(heading) to -velocity * Math.cos(heading)
-        } else if (keyDown(KeyCode.S) && !keyDown(KeyCode.W)) {
+        } else if (player.backward() && !player.forward()) {
             -velocity * Math.sin(heading) to velocity * Math.cos(heading)
         } else 0.0 to 0.0
 
-        val attemptedRotation = if (keyDown(KeyCode.A) && !keyDown(KeyCode.D)) {
+        val attemptedRotation = if (player.turnLeft() && !player.turnRight()) {
             -velRotation
-        } else if (keyDown(KeyCode.D) && !keyDown(KeyCode.A)) {
+        } else if (player.turnRight() && !player.turnLeft()) {
             velRotation
         } else 0.0
 
