@@ -4,12 +4,14 @@ import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.entities.Wall
+import de.randomerror.genetictank.genetic.HumanPlayer
 import de.randomerror.genetictank.helper.render
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Keyboard.keyDown
 import de.randomerror.genetictank.input.Mouse
 import de.randomerror.genetictank.labyrinth.Labyrinth
+import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import javafx.animation.AnimationTimer
 import javafx.geometry.Point2D
 import javafx.scene.canvas.Canvas
@@ -20,6 +22,8 @@ import java.util.*
 class GameLoop(canvas: Canvas) : AnimationTimer() {
     var gc = canvas.graphicsContext2D
     var previousTime = System.nanoTime()
+    
+    var labyrinth: Labyrinth
 
     var translate: Point2D = Point2D(0.0, 0.0)
     var scale: Double = 1.0
@@ -31,29 +35,27 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
 
-        entities += Tank(50.0, 50.0, Color.SADDLEBROWN)
+        entities += Tank(50.0, 50.0, Color.SADDLEBROWN, HumanPlayer())
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
 
-        loadLabyrinth()
-    }
-
-    private fun calculateScale() {
-        val labWidth = 10
-        val labHeight = 10
-        val (labW, labH) = Labyrinth.getRealSize(labWidth, labHeight)
-
-        scale = Math.min(gc.canvas.width / labW, gc.canvas.height / labH) * 0.8
-        translate = Point2D((gc.canvas.width - labW * scale) / 2, (gc.canvas.height - labH * scale) / 2)
+        labyrinth = LabyrinthGenerator.generate(10, 10, Random(level++))
+        entities += labyrinth.asWalls()
+        calculateScale()
     }
 
     private fun loadLabyrinth() {
         entities.removeAll { it is Wall }
-        
-        val labWidth = 10
-        val labHeight = 10
-        entities += Labyrinth.generate(labWidth, labHeight, Random(level++))
-        
+
+        labyrinth = LabyrinthGenerator.generate(10, 10, Random(level++))
+        entities += labyrinth.asWalls()
         calculateScale()
+    }
+
+    private fun calculateScale() {
+        val (labW, labH) = labyrinth.getRealSize()
+
+        scale = Math.min(gc.canvas.width / labW, gc.canvas.height / labH) * 0.8
+        translate = Point2D((gc.canvas.width - labW * scale) / 2, (gc.canvas.height - labH * scale) / 2)
     }
 
     override fun handle(now: Long) {

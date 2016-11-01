@@ -1,59 +1,17 @@
 package de.randomerror.genetictank.labyrinth
 
 import de.randomerror.genetictank.entities.Wall
-import java.util.*
+import de.randomerror.genetictank.labyrinth.TileType.PATH
+import de.randomerror.genetictank.labyrinth.TileType.WALL
 
-object Labyrinth {
-    fun generate(width: Int, height: Int, random: Random = Random()): List<Wall> {
-        val grid = Grid(width * 2 + 1, height * 2 + 1, random)
+class Labyrinth(val w: Int, val h: Int) {
+    private val data = Array(w) { x -> Array(h) { y -> WALL } }
+    
+    fun asBooleanArray() = data.map { a -> a.map { it == WALL }.toTypedArray() }.toTypedArray()
 
-        val start = grid.randomPoint()
-        generate(start, grid, random)
-
-        return convertToWalls(grid)
-    }
-
-    fun print(labyrinth: Array<Array<Boolean>>) {
-        (0..labyrinth.lastIndex).forEach { x ->
-            (0..labyrinth[x].lastIndex).forEach { y ->
-                print(if (labyrinth[x][y]) "# " else ". ")
-            }
-            println()
-        }
-    }
-
-    private fun generate(current: Point, grid: Grid, random: Random) {
-        grid.setPathAt(current)
-
-        listOf(up, down, left, right)
-                .map { current + it }
-                .filter { it in grid }
-                .shuffled(random)
-                .forEach { next ->
-                    if (grid.isWall(next)) {
-                        grid.setPathAt((current + next) / 2)
-
-                        generate(next, grid, random)
-                    } else if (random.nextDouble() < 0.2) { // allow break through walls occasionally
-                        // ensure the breakthrough does not introduce a mini circle or a single dot wall
-                        val move = next - current
-                        val sideR = current + move.rotatedRight() + move / 2
-                        val sideL = current + move.rotatedLeft() + move / 2
-                        val valid = (sideR !in grid || grid.isWall(sideR))
-                                && (sideL !in grid || grid.isWall(sideL))
-
-                        if (valid) {
-                            grid.setPathAt((current + next) / 2)
-                            grid.setPathAt(next)
-                        }
-                    }
-                }
-    }
-
-    private fun convertToWalls(grid: Grid): List<Wall> {
-
-        return (0..grid.w - 1).flatMap { x -> (0..grid.h - 1).map { y -> Point(x, y) } }
-                .filter { grid.isWall(it) }
+    fun asWalls(): List<Wall> {
+        return (0..w - 1).flatMap { x -> (0..h - 1).map { y -> Point(x, y) } }
+                .filter { isWall(it) }
                 // filter all walls that are dot-like and would be contained in a larger wall to their right or bottom
                 .filter { point ->
                     if (point.x % 2 != 0 || point.y % 2 != 0) return@filter true
@@ -61,7 +19,7 @@ object Labyrinth {
                     val rightWall = point + Point(1, 0)
                     val bottomWall = point + Point(0, 1)
 
-                    return@filter !(grid.isWall(rightWall) || grid.isWall(bottomWall))
+                    return@filter !(isWall(rightWall) || isWall(bottomWall))
                 }
                 .map { point ->
                     val x = point.x / 2 * tileSize
@@ -73,17 +31,20 @@ object Labyrinth {
                 }
     }
 
-    fun getRealSize(width: Int, height: Int): Pair<Double, Double> {
-        return width * tileSize + wallSize to height * tileSize + wallSize
+    fun getRealSize(): Pair<Double, Double> {
+        return w * tileSize + wallSize to h * tileSize + wallSize
+    }
+    
+    internal fun isWall(p: Point) = if (p in this) data[p.x][p.y] == WALL else false
+
+    internal fun setPathAt(p: Point) {
+        data[p.x][p.y] = PATH
     }
 
-    private val tileSize = 100.0
-    private val wallSize = tileSize * 0.075
+    internal operator fun contains(point: Point) = point.x >= 0 && point.x < w && point.y >= 0 && point.y < h
 
-    private val up = Point(0, -2)
-    private val down = Point(0, 2)
-    private val left = Point(-2, 0)
-    private val right = Point(2, 0)
-
-    private fun <T> List<T>.shuffled(random: Random = Random()) = apply { Collections.shuffle(this, random) }
+    companion object {
+        private val tileSize = 100.0
+        private val wallSize = tileSize * 0.075
+    }
 }

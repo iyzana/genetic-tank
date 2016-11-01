@@ -1,7 +1,7 @@
 package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.entities.Entity
-import de.randomerror.genetictank.labyrinth.Labyrinth
+import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import java.util.*
 
 /**
@@ -19,7 +19,7 @@ object Trainer {
         (0 until numPokemons).forEach {
             pokemons += ASI(listOf(47, 15, 5))
         }
-        entities =  Labyrinth.generate(10,10)
+        entities =  LabyrinthGenerator.generate(10,10).asWalls()
     }
 
     fun update() {
