@@ -56,6 +56,8 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
     override fun update(deltaTime: Double) {
         if (!alive) return
 
+        player.update(deltaTime, this)
+
         var (velX, velY, velH) = getAttemptedMove()
         val (testX, testY, testH) = getNewPosition(deltaTime)
 

@@ -4,6 +4,7 @@ import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.entities.Wall
+import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.HumanPlayer
 import de.randomerror.genetictank.helper.render
 import de.randomerror.genetictank.helper.transformContext
@@ -31,11 +32,15 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     var fps = 0.0
     var ups = 0.0
 
+    var KI = Tank(150.0, 50.0, Color.ALICEBLUE, ASI(listOf(45, 15, 5)))
+
     init {
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
 
         entities += Tank(50.0, 50.0, Color.SADDLEBROWN, HumanPlayer())
+        entities += KI
+
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
 
         labyrinth = LabyrinthGenerator.generate(10, 10, Random(level++))
@@ -71,6 +76,11 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
             GameLoop.entities.removeAll { it is Projectile }
+        if (keyDown(KeyCode.T, once = true)) {
+            entities -= KI
+            KI = Tank(150.0, 50.0, Color.ALICEBLUE, ASI(listOf(45, 15, 5)))
+            entities += KI
+        }
 
         val deltaTime = (now - previousTime) / 1000000000.0
         val updateDelta = Math.min(deltaTime, 1.0 / 40.0)

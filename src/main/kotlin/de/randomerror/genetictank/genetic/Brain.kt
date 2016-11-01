@@ -13,7 +13,7 @@ class Brain(val layers: List<Int>) {
 
     init {
         theNetwork = (0 until layers.size - 1).map { i ->
-            Matrix.random(1, layers[i]) to Matrix.random(layers[i], layers[i + 1])
+            Matrix.random(1, layers[i+1]) to Matrix.random(layers[i], layers[i + 1])
         }
     }
 

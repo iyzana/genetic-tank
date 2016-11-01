@@ -1,5 +1,6 @@
 package de.randomerror.genetictank.genetic
 
+import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Keyboard.keyDown
 import javafx.scene.input.KeyCode
@@ -8,6 +9,7 @@ import javafx.scene.input.KeyCode
  * Created by henri on 01.11.16.
  */
 class HumanPlayer : Player {
+    override fun update(deltaTime: Double, body: Tank) {}
 
     override fun forward() = keyDown(KeyCode.W)
 
