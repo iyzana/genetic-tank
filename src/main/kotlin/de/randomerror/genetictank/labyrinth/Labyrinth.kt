@@ -32,7 +32,7 @@ class Labyrinth(val w: Int, val h: Int) {
     }
 
     fun getRealSize(): Pair<Double, Double> {
-        return w * tileSize + wallSize to h * tileSize + wallSize
+        return (w - 1) / 2 * tileSize + wallSize to (h - 1) / 2 * tileSize + wallSize
     }
     
     internal fun isWall(p: Point) = if (p in this) data[p.x][p.y] == WALL else false
