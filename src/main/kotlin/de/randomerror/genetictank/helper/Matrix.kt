@@ -7,12 +7,12 @@ import java.util.*
  */
 class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
     val data: Array<Array<Double>> = Array(x) { i -> Array(y) { j -> init(i, j) } }
-
+    
     operator fun times(other: Matrix): Matrix {
         require(x == other.y)
 
         return Matrix(other.x, y) { i, j ->
-            (0 until x).sumByDouble { data[it][j] * other.data[i][it] }
+            (0 until x).sumByDouble { data[it, j] * other.data[i, it] }
         }
     }
 
@@ -20,7 +20,7 @@ class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
         require(x == other.x && y == other.y)
 
         return Matrix(x, y) { i, j ->
-            data[i][j] + other.data[i][j]
+            data[i, j] + other.data[i, j]
         }
     }
 

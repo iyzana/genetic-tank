@@ -1,6 +1,7 @@
 package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.helper.Matrix
+import de.randomerror.genetictank.helper.get
 
 /**
  * Created by henri on 24.10.16.
@@ -27,7 +28,7 @@ class ASI(val layers: List<Int>) {
         require(vector.x == 1)
 
         return Matrix(1, vector.y) { i, j ->
-            1.0 / (1.0 + Math.exp(-vector.data[i][j]))
+            1.0 / (1.0 + Math.exp(-vector.data[i, j]))
         }
     }
 }
