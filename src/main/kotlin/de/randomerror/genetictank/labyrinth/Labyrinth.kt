@@ -31,11 +31,17 @@ class Labyrinth(val w: Int, val h: Int) {
                 }
     }
 
+    fun getTileSize(): Pair<Double, Double> {
+        return tileSize + wallSize to tileSize + wallSize
+    }
+
     fun getRealSize(): Pair<Double, Double> {
         return (w - 1) / 2 * tileSize + wallSize to (h - 1) / 2 * tileSize + wallSize
     }
     
     internal fun isWall(p: Point) = if (p in this) data[p.x][p.y] == WALL else false
+    
+    internal fun isPath(p: Point) = if (p in this) data[p.x][p.y] == PATH else false
 
     internal fun setPathAt(p: Point) {
         data[p.x][p.y] = PATH

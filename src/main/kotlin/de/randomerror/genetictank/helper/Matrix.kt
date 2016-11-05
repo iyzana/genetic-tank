@@ -6,14 +6,18 @@ import java.util.*
  * Created by henri on 01.11.16.
  */
 class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
-    val data: Array<Array<Double>> = Array(x) { i -> Array(y) { j -> init(i, j) } }
-    
-    operator fun times(other: Matrix): Matrix {
-        require(x == other.y)
+    private val data: Array<Array<Double>> = Array(x) { i -> Array(y) { j -> init(i, j) } }
 
-        return Matrix(other.x, y) { i, j ->
-            (0 until x).sumByDouble { data[it, j] * other.data[i, it] }
-        }
+    operator fun get(y: Int) = data[0][y]
+    
+    operator fun get(x: Int, y: Int) = data[x][y]
+
+    operator fun set(y: Int, value: Double) {
+        data[0][y] = value
+    }
+
+    operator fun set(x: Int, y: Int, value: Double) {
+        data[x][y] = value
     }
 
     operator fun plus(other: Matrix): Matrix {
@@ -22,7 +26,15 @@ class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
         }
 
         return Matrix(x, y) { i, j ->
-            data[i, j] + other.data[i, j]
+            data[i, j] + other[i, j]
+        }
+    }
+
+    operator fun times(other: Matrix): Matrix {
+        require(x == other.y)
+
+        return Matrix(other.x, y) { i, j ->
+            (0 until x).sumByDouble { data[it, j] * other[i, it] }
         }
     }
 

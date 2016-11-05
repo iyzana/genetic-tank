@@ -2,6 +2,7 @@ package de.randomerror.genetictank.entities
 
 import de.randomerror.genetictank.GameLoop
 import de.randomerror.genetictank.genetic.HumanPlayer
+import de.randomerror.genetictank.genetic.TrainingAI
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
 import javafx.scene.canvas.GraphicsContext
@@ -12,6 +13,8 @@ import javafx.scene.paint.Color
  * Created by henri on 19.10.16.
  */
 class Projectile(x: Double, y: Double, heading: Double) : Entity() {
+    var entities = GameLoop.entities
+
     val color = Color(.0, .0, .0, 1.0)
     val radius = 3.0
 
@@ -42,11 +45,21 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
         val curX = x
         val curY = y
         val newX = x + velX * deltaTime
-        val newY = y + velY * deltaTime 
+        val newY = y + velY * deltaTime
 
-        val walls = GameLoop.entities
+        collideWalls(curX, curY, newX, newY)
+
+        x += velX * deltaTime
+        y += velY * deltaTime
+
+        collideTank()
+    }
+
+    private fun collideWalls(curX: Double, curY: Double, newX: Double, newY: Double) {
+        val walls = entities
                 .filter { it is Wall }
                 .map { it as Wall }
+                .filter { Math.abs(x - it.x) < 200 && Math.abs(y - it.y) < 200 }
                 .filter { it.collides(newX + radius, curY + radius) || it.collides(curX + radius, newY + radius) }
 
         walls.firstOrNull { it.collides(newX + radius, curY + radius) }?.let { wall ->
@@ -66,16 +79,17 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
             else
                 wall.y + wall.height
         }
-        
-        x += velX * deltaTime
-        y += velY * deltaTime
-        
-        GameLoop.entities
-                .filter { it is Tank }
+    }
+
+    private fun collideTank() {
+        entities.filter { it is Tank }
                 .map { it as Tank }
                 .filter { it.collides(x + radius, y + radius) }
-                .filter { it.player !is HumanPlayer }
-                .forEach { it.alive = false }
+                .filter { it.player !is HumanPlayer && it.player !is TrainingAI }
+                .forEach {
+                    it.alive = false
+                    entities.remove(this@Projectile)
+                }
     }
 
     override fun collides(x: Double, y: Double) = false

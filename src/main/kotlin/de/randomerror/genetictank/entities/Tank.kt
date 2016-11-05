@@ -19,6 +19,11 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         this.y = yPos
     }
 
+    var entities = GameLoop.entities
+    var labyrinth = GameLoop.labyrinth
+
+    var game = GameLoop
+
     var heading = 0.0
 
     val velocity = 150.0
@@ -28,8 +33,8 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
     val height = 50.0
 
     var alive = true
-    
-    var bullets = 0
+
+    val bullets = mutableListOf<Projectile>()
 
     override fun render(gc: GraphicsContext) = gc.transformContext {
         if (!alive) return@transformContext
@@ -63,39 +68,41 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         var (velX, velY, velH) = getAttemptedMove()
         val (testX, testY, testH) = getNewPosition(deltaTime)
 
-        val walls = GameLoop.entities
+        val walls = entities
                 .filter { it is Wall }
                 .map { it as Wall }
-                .filter { Math.abs(x - it.x) < 400 && Math.abs(y - it.y) < 400 }
+                .filter { Math.abs(x - it.x) < 150 && Math.abs(y - it.y) < 150 }
 
-        val testBoundsX = RotatedRectangle(testX, y, width, height, heading)
-        walls.filter { testBoundsX.collidesWith(it.bounds) }.forEach { wall ->
-            velX = 0.0
-            velY = 0.0
-        }
-        val testBoundsY = RotatedRectangle(x, testY, width, height, heading)
-        walls.filter { testBoundsY.collidesWith(it.bounds) }.forEach { wall ->
-            velX = 0.0
-            velY = 0.0
-        }
+        if (!walls.isEmpty()) {
+            val testBoundsX = RotatedRectangle(testX, y, width, height, heading)
+            walls.filter { testBoundsX.collidesWithRect(it.bounds) }.forEach { wall ->
+                velX = 0.0
+                velY = 0.0
+            }
+            val testBoundsY = RotatedRectangle(x, testY, width, height, heading)
+            walls.filter { testBoundsY.collidesWithRect(it.bounds) }.forEach { wall ->
+                velX = 0.0
+                velY = 0.0
+            }
 
-        val testBoundsH = RotatedRectangle(x, y, width, height, testH)
-        walls.filter { testBoundsH.collidesWith(it.bounds) }.forEach { wall ->
-            val collision = testBoundsH.collisionArea(wall.bounds)
-            val midX = collision.x + collision.width / 2
-            val midY = collision.y + collision.height / 2
+            val testBoundsH = RotatedRectangle(x, y, width, height, testH)
+            walls.filter { testBoundsH.collidesWithRect(it.bounds) }.forEach { wall ->
+                val collision = testBoundsH.collisionArea(wall.bounds)
+                val midX = collision.x + collision.width / 2
+                val midY = collision.y + collision.height / 2
 
-            if (Math.min(Math.abs(midX - wall.x), Math.abs(midX - (wall.x + wall.width))) > Math.min(Math.abs(midY - wall.y), Math.abs(midY - (wall.y + wall.height)))) {
-                if (y + height / 2 < wall.y + wall.height / 2) {
-                    y -= Math.abs(wall.y - (collision.y + collision.height))
+                if (Math.min(Math.abs(midX - wall.x), Math.abs(midX - (wall.x + wall.width))) > Math.min(Math.abs(midY - wall.y), Math.abs(midY - (wall.y + wall.height)))) {
+                    if (y + height / 2 < wall.y + wall.height / 2) {
+                        y -= Math.abs(wall.y - (collision.y + collision.height))
+                    } else {
+                        y += Math.abs(wall.y + wall.height - (collision.y))
+                    }
                 } else {
-                    y += Math.abs(wall.y + wall.height - (collision.y))
-                }
-            } else {
-                if (x + width / 2 < wall.x + wall.width / 2) {
-                    x -= Math.abs(wall.x - (collision.x + collision.width))
-                } else {
-                    x += Math.abs(wall.x + wall.width - (collision.x))
+                    if (x + width / 2 < wall.x + wall.width / 2) {
+                        x -= Math.abs(wall.x - (collision.x + collision.width))
+                    } else {
+                        x += Math.abs(wall.x + wall.width - (collision.x))
+                    }
                 }
             }
         }
@@ -104,11 +111,15 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         y += velY * deltaTime
         heading += velH * deltaTime
 
-        if (bullets < 5 && player.shoot()) {
+        bullets.removeAll { !it.alive }
+
+        if (player.shoot() && bullets.size < 5) {
             val px = x + width / 2 + Math.sin(heading) * (height / 2)
             val py = y + height / 2 - Math.cos(heading) * (height / 2)
-            GameLoop.entities += Projectile(px, py, heading)
-            bullets++
+            val projectile = Projectile(px, py, heading)
+            projectile.entities = entities
+            entities.add(projectile)
+            bullets += projectile
         }
     }
 

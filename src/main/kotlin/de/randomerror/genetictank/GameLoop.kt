@@ -7,7 +7,6 @@ import de.randomerror.genetictank.entities.Wall
 import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.HumanPlayer
 import de.randomerror.genetictank.genetic.Trainer
-import de.randomerror.genetictank.genetic.TrainingAI
 import de.randomerror.genetictank.helper.render
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
@@ -22,15 +21,13 @@ import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import java.util.*
 
-class GameLoop(canvas: Canvas) : AnimationTimer() {
+class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     var gc = canvas.graphicsContext2D
     var previousTime = System.nanoTime()
 
-    var labyrinth: Labyrinth
 
     var translate: Point2D = Point2D(0.0, 0.0)
     var scale: Double = 1.0
-    var level = 1L
     var fps = 0.0
     var ups = 0.0
 
@@ -40,12 +37,11 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
 
-        entities += Tank(50.0, 10.0, Color.SADDLEBROWN, HumanPlayer())
+        entities += Tank(500.0, 500.0, Color.SADDLEBROWN, HumanPlayer())
         entities += KI
 
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
 
-        labyrinth = LabyrinthGenerator.generate(10, 10, Random(level++))
         entities += labyrinth.asWalls()
         calculateScale()
     }
@@ -53,7 +49,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
     private fun loadLabyrinth() {
         entities.removeAll { it is Wall }
 
-        labyrinth = LabyrinthGenerator.generate(10, 10, Random(level++))
+        labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
         entities += labyrinth.asWalls()
         calculateScale()
     }
@@ -81,7 +77,7 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
         if (keyDown(KeyCode.T, once = true)) {
             GameLoop.entities.removeAll { it is Projectile }
             entities -= KI
-            KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(45, 15, 5)))
+            KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(81, 81, 5)))
             entities += KI
         }
 
@@ -109,5 +105,8 @@ class GameLoop(canvas: Canvas) : AnimationTimer() {
 
     companion object {
         val entities = mutableListOf<Entity>()
+
+        var level = 1L
+        var labyrinth: Labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
     }
 }

@@ -1,13 +1,13 @@
 package de.randomerror.genetictank.genetic
 
-import de.randomerror.genetictank.GameLoop
 import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Tank
-import de.randomerror.genetictank.helper.render
-import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import javafx.scene.paint.Color
 import java.util.*
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 /**
  * Created by henri on 01.11.16.
@@ -15,60 +15,71 @@ import java.util.*
 
 object Trainer {
 
-    var pokemons: MutableList<ASI> = LinkedList<ASI>()
-    val numPokemons = 1000
+    val numPokémon = 1000
+    private val roundTime = 30.0
+
+    var pokémon = (0 until numPokémon).map {
+        ASI(listOf(81, 81, 5))
+    }
 
     val deltaTime = 0.016
 
-    init {
-        (0 until numPokemons).forEach {
-            pokemons.add(ASI(listOf(47, 15, 5)))
+    private val labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
+    private val walls = labyrinth.asWalls()
+
+    private data class PokemonFitness(val pokemon: ASI, val fitness: Double) {
+        init {
+            println(fitness)
         }
-        GameLoop.entities += LabyrinthGenerator.generate(10,10, Random(1)).asWalls()
     }
 
     fun evolve(): List<ASI> {
-        val fitness = pokemons.map { pokemon ->
-            val fit = train(pokemon)
-            println(fit)
-            pokemon to fit
-        }.sortedByDescending { it.second }
+        fun ASI.toFitnessChecker() = Callable<PokemonFitness> { PokemonFitness(this, train(this)) }
 
-        println("best: " + fitness.first().second)
+        val fitness = Executors.newFixedThreadPool(8)
+                .invokeAll(pokémon.map(ASI::toFitnessChecker))
+                .map(Future<PokemonFitness>::get)
+                .sortedByDescending { it.fitness }
 
-        val survivors = fitness.take((numPokemons*0.2).toInt()).map { it.first }.toMutableList()
-        (0..(numPokemons-survivors.size)).forEach {
-            survivors += ASI(listOf(47, 15, 5))
+        println("best: " + fitness[0].fitness)
+
+        val surviveCount = (numPokémon * 0.2).toInt()
+        val mutateCount = (numPokémon * 0.8).toInt()
+
+        pokémon = fitness.take(surviveCount).map { it.pokemon }
+        
+        pokémon += (0..mutateCount).map {
+            ASI(listOf(81, 81, 5))
         }
 
-        pokemons = survivors
-
-        GameLoop.entities.clear()
-
-        return survivors
+        return pokémon
     }
 
 
-
     fun train(pokemon: ASI): Double {
-        GameLoop.entities.clear()
-        GameLoop.entities += LabyrinthGenerator.generate(10,10, Random(1)).asWalls()
-        val enemy = Tank(500.0, 500.0, Color.BLACK, TrainingAI())
-        val body = Tank(50.0, 10.0, Color.ALICEBLUE, pokemon)
-        var time = 0.0;
+        val entities: MutableList<Entity> = walls.toMutableList()
 
-        GameLoop.entities += enemy
-        GameLoop.entities += body
+        val enemy = Tank(500.0, 500.0, Color.BLACK, HumanPlayer())
+        val body = Tank(50.0, 10.0, Color.ALICEBLUE, pokemon)
+        var time = 0.0
+
+        enemy.entities = entities
+        enemy.labyrinth = labyrinth
+        body.entities = entities
+        body.labyrinth = labyrinth
+
+        entities += enemy
+        entities += body
 
         do {
-            GameLoop.entities.toList().forEach { it.update(deltaTime) }
+            entities.toList().forEach { it.update(deltaTime) }
             time += deltaTime
-        } while (enemy.alive && body.alive && time < 60)
+        } while (enemy.alive && body.alive && time < roundTime)
 
         return when {
-            body.alive && !enemy.alive -> 60.0-time
+            body.alive && !enemy.alive -> roundTime - time
             body.alive && enemy.alive -> 0.0
-            else -> time-60.0
+            else -> time - roundTime
         }
     }
 }

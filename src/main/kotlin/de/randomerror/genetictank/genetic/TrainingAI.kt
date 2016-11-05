@@ -1,6 +1,7 @@
 package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.GameLoop
+import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Tank
 
 /**
@@ -10,12 +11,13 @@ class TrainingAI : Player {
     var shoot = false
 
     override fun update(deltaTime: Double, body: Tank) {
-        val enemy = GameLoop.entities.filter { it is Tank && it != body }.first()
+        val enemy = body.entities.filter { it != body && it is Tank }.first()
 
-        if (Math.abs(Math.atan2(body.y - enemy.y, body.x - enemy.x) - body.heading) < 1.0)
-            shoot = true
-        else
-            shoot = false
+        calcIfShoot(body, enemy)
+    }
+
+    private fun calcIfShoot(body: Tank, enemy: Entity) {
+        shoot = Math.abs(Math.atan2(body.y - enemy.y, body.x - enemy.x) - body.heading) < 1.0
     }
 
     override fun forward() = false
@@ -26,6 +28,6 @@ class TrainingAI : Player {
 
     override fun turnLeft() = false
 
-    override fun shoot() = false
+    override fun shoot() = Math.random() < 0.03
 
 }

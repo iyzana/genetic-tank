@@ -15,11 +15,11 @@ class Rectangle(val x: Double, val y: Double, val width: Double, val height: Dou
     fun collidesWith(x: Double, y: Double) = x > this.x && x < this.x + width && y > this.y && y < this.y + height
 }
 
-class RotatedRectangle(var x: Double, var y: Double, var width: Double, var height: Double, var rotation: Double) {
-    val area: Area
-        get() = Area(Rectangle2D.Double(x, y, width, height)).run {
-            createTransformedArea(AffineTransform.getRotateInstance(rotation, bounds.centerX, bounds.centerY))
-        }
+class RotatedRectangle(val x: Double, val y: Double, val width: Double, val height: Double, var rotation: Double) {
+    val area: Area = Area(Rectangle2D.Double(x, y, width, height)).run {
+        createTransformedArea(AffineTransform.getRotateInstance(rotation, bounds.centerX, bounds.centerY))
+    }
+    
     val outline: Rectangle
         get() {
             val bounds = area.bounds2D
@@ -28,7 +28,7 @@ class RotatedRectangle(var x: Double, var y: Double, var width: Double, var heig
 
     fun collidesWith(x: Double, y: Double) = area.contains(x, y)
 
-    fun collidesWith(other: Rectangle): Boolean {
+    fun collidesWithRect(other: Rectangle): Boolean {
         return Area(area).run {
             intersect(other.area)
             !isEmpty
