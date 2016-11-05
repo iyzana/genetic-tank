@@ -12,7 +12,7 @@ import de.randomerror.genetictank.labyrinth.Point
 class ASI(val layers: List<Int>) : Player {
     var time = 0.0
     
-    val brain = Brain(layers)
+    var brain = Brain(layers)
     var stateOfMind = Matrix(1, layers.last(), { i, j -> 0.0 })
 
     override fun update(deltaTime: Double, body: Tank) {
@@ -26,7 +26,7 @@ class ASI(val layers: List<Int>) : Player {
         idea[3] = enemy.heading
         idea[4] = body.heading
         
-        val bullets = body.entities.filter { it is Projectile }.take(10).forEachIndexed { i, entity ->
+        body.entities.asSequence().filter { it is Projectile }.take(10).forEachIndexed { i, entity ->
             idea[4 * i + 5] = entity.x - body.x
             idea[4 * i + 6] = entity.y - body.y
             idea[4 * i + 7] = entity.velX
@@ -62,6 +62,12 @@ class ASI(val layers: List<Int>) : Player {
     override fun turnLeft() = stateOfMind[3] > 0.5
 
     override fun shoot() = stateOfMind[4] > 0.5
+
+    fun copy(): ASI {
+        val asi = ASI(layers)
+        asi.brain = brain.copy()
+        return asi
+    }
 
     companion object {
         private val directions = listOf(Point(0, -1), Point(1, 0), Point(0, 1), Point(-1, 0))

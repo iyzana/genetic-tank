@@ -9,7 +9,7 @@ class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
     private val data: Array<Array<Double>> = Array(x) { i -> Array(y) { j -> init(i, j) } }
 
     operator fun get(y: Int) = data[0][y]
-    
+
     operator fun get(x: Int, y: Int) = data[x][y]
 
     operator fun set(y: Int, value: Double) {
@@ -37,6 +37,8 @@ class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
             (0 until x).sumByDouble { data[it, j] * other[i, it] }
         }
     }
+
+    fun copy() = Matrix(x, y) { i, j -> data[i, j] }
 
     companion object {
         fun random(x: Int, y: Int, range: ClosedRange<Double> = -1.0..1.0): Matrix {

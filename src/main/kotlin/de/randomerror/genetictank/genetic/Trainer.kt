@@ -2,7 +2,9 @@ package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Tank
+import de.randomerror.genetictank.helper.shuffled
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
+import de.randomerror.genetictank.labyrinth.Point
 import javafx.scene.paint.Color
 import java.util.*
 import java.util.concurrent.Callable
@@ -36,7 +38,7 @@ object Trainer {
     fun evolve(): List<ASI> {
         fun ASI.toFitnessChecker() = Callable<PokemonFitness> { PokemonFitness(this, train(this)) }
 
-        val fitness = Executors.newFixedThreadPool(8)
+        val fitness = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
                 .invokeAll(pokémon.map(ASI::toFitnessChecker))
                 .map(Future<PokemonFitness>::get)
                 .sortedByDescending { it.fitness }
@@ -47,14 +49,13 @@ object Trainer {
         val mutateCount = (numPokémon * 0.8).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon }
-        
-        pokémon += (0..mutateCount).map {
-            ASI(listOf(81, 81, 5))
+
+        pokémon += (0..mutateCount).map { i ->
+            pokémon[i].copy().apply { mutate() }
         }
 
         return pokémon
     }
-
 
     fun train(pokemon: ASI): Double {
         val entities: MutableList<Entity> = walls.toMutableList()
@@ -81,5 +82,18 @@ object Trainer {
             body.alive && enemy.alive -> 0.0
             else -> time - roundTime
         }
+    }
+
+    fun ASI.mutate() {
+        val brainMass = brain.allAxons
+                .flatMap { axon -> Array(axon.x) { i -> Array(axon.y) { j -> axon to Point(i, j) }.toList() }.flatMap { it }.toList() }
+                .shuffled()
+        brainMass.take(brainMass.size * 5 / 100)
+                .forEach { pair ->
+                    val (axon, position) = pair
+
+                    val ohm = axon[position.x, position.y]
+                    axon[position.x, position.y] = ohm + (Math.random() * 20 - 10) + (ohm * (Math.random() * 20 - 10) / 100)
+                }
     }
 }
