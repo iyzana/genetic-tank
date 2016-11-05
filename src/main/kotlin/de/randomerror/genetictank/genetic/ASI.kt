@@ -53,6 +53,10 @@ class ASI(val layers: List<Int>) : Player {
         time += deltaTime
     }
 
+    fun reset() {
+        time = 0.0
+    }
+
     override fun forward() = stateOfMind[0] > 0.5
 
     override fun backward() = stateOfMind[1] > 0.5

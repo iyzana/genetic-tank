@@ -89,15 +89,17 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(81, 81, 5)))
             entities += KI
         }
-        
+
         if (!KI.alive || keyDown(KeyCode.G, once = true) || showTime <= 0) {
             GameLoop.entities.removeAll { it is Projectile || it is Wall }
             entities += Trainer.walls
             entities -= KI
-            
+
             Trainer.evolve()
 
-            KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), Trainer.pokémon.first())
+            val asi = Trainer.pokémon.first()
+            asi.reset()
+            KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), asi)
             entities += KI
 
             showTime = 30.0

@@ -53,6 +53,7 @@ object Trainer {
         val mutateCount = (numPokémon * 0.7).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon }
+        pokémon.forEach(ASI::reset)
 
         pokémon += (0 until mutateCount).map {
             pokémon[(Math.random() * pokémon.size).toInt()].copy().apply { mutate() }
