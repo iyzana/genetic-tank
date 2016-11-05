@@ -44,7 +44,7 @@ class ASI(val layers: List<Int>) : Player {
             yPositions.forEachIndexed { iy, dy ->
                 directions.forEachIndexed { id, d ->
                     val pos = Point(dx, dy) + d
-                    idea[(ix * yPositions.size + iy) * 4 + id + 9] = if(!body.labyrinth.isPath(pos)) 1.0 else 0.0
+                    idea[(ix * yPositions.size + iy) * 4 + id + 45] = if(!body.labyrinth.isPath(pos)) 1.0 else 0.0
                 }
             }
         }

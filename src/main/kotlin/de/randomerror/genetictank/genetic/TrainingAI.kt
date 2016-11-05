@@ -1,6 +1,5 @@
 package de.randomerror.genetictank.genetic
 
-import de.randomerror.genetictank.GameLoop
 import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Tank
 
@@ -20,13 +19,13 @@ class TrainingAI : Player {
         shoot = Math.abs(Math.atan2(body.y - enemy.y, body.x - enemy.x) - body.heading) < 1.0
     }
 
-    override fun forward() = false
+    override fun forward() = Math.random() < 0.1
 
     override fun backward() = false
 
-    override fun turnRight() = true
+    override fun turnRight() = false
 
-    override fun turnLeft() = false
+    override fun turnLeft() = Math.random() < 0.1
 
     override fun shoot() = Math.random() < 0.03
 

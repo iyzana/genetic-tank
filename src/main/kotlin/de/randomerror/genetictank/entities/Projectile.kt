@@ -1,7 +1,7 @@
 package de.randomerror.genetictank.entities
 
 import de.randomerror.genetictank.GameLoop
-import de.randomerror.genetictank.genetic.HumanPlayer
+import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.TrainingAI
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
@@ -85,7 +85,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
         entities.filter { it is Tank }
                 .map { it as Tank }
                 .filter { it.collides(x + radius, y + radius) }
-                .filter { it.player !is HumanPlayer && it.player !is TrainingAI }
+                .filter { it.player !is StillPlayer && it.player !is TrainingAI }
                 .forEach {
                     it.alive = false
                     entities.remove(this@Projectile)

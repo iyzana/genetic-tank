@@ -6,6 +6,7 @@ import de.randomerror.genetictank.helper.RotatedRectangle
 import de.randomerror.genetictank.helper.getBounds
 import de.randomerror.genetictank.helper.rotate
 import de.randomerror.genetictank.helper.transformContext
+import de.randomerror.genetictank.labyrinth.Point
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 
@@ -33,6 +34,9 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
     val height = 50.0
 
     var alive = true
+
+    var movedDistance = 0.0
+    internal val visitedTiles = mutableSetOf<Point>()
 
     val bullets = mutableListOf<Projectile>()
 
@@ -111,6 +115,14 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         y += velY * deltaTime
         heading += velH * deltaTime
 
+        movedDistance += Math.abs(velX * deltaTime)
+        movedDistance += Math.abs(velY * deltaTime)
+        
+        val (tileW, tileH) = labyrinth.getTileSize()
+        val tileX = ((x + width / 2) / tileW).toInt() * 2 + 1
+        val tileY = ((y + height / 2) / tileH).toInt() * 2 + 1
+        visitedTiles += Point(tileX, tileY)
+        
         bullets.removeAll { !it.alive }
 
         if (player.shoot() && bullets.size < 5) {

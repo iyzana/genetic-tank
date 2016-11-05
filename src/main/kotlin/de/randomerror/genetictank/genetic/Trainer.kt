@@ -26,8 +26,9 @@ object Trainer {
 
     val deltaTime = 0.016
 
-    private val labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
-    private val walls = labyrinth.asWalls()
+    private var labIndex = 1L
+    private var labyrinth = LabyrinthGenerator.generate(5, 5, Random(0))
+    var walls = labyrinth.asWalls()
 
     private data class PokemonFitness(val pokemon: ASI, val fitness: Double) {
         init {
@@ -38,6 +39,9 @@ object Trainer {
     fun evolve(): List<ASI> {
         fun ASI.toFitnessChecker() = Callable<PokemonFitness> { PokemonFitness(this, train(this)) }
 
+        labyrinth = LabyrinthGenerator.generate(5, 5, Random(labIndex++))
+        walls = labyrinth.asWalls()
+
         val fitness = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
                 .invokeAll(pokémon.map(ASI::toFitnessChecker))
                 .map(Future<PokemonFitness>::get)
@@ -45,23 +49,27 @@ object Trainer {
 
         println("best: " + fitness[0].fitness)
 
-        val surviveCount = (numPokémon * 0.2).toInt().coerceAtLeast(1)
-        val mutateCount = (numPokémon * 0.8).toInt()
+        val surviveCount = (numPokémon * 0.3).toInt().coerceAtLeast(1)
+        val mutateCount = (numPokémon * 0.7).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon }
 
         pokémon += (0 until mutateCount).map {
-            pokémon[0].copy().apply { mutate() }
+            pokémon[(Math.random() * pokémon.size).toInt()].copy().apply { mutate() }
         }
 
         return pokémon
     }
 
     fun train(pokemon: ASI): Double {
+        return train(pokemon, StillPlayer())
+    }
+
+    fun train(pokemon: ASI, against: Player): Double {
         val entities: MutableList<Entity> = walls.toMutableList()
 
-        val enemy = Tank(500.0, 500.0, Color.BLACK, HumanPlayer())
-        val body = Tank(50.0, 10.0, Color.ALICEBLUE, pokemon)
+        val enemy = Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
+        val body = Tank(150.0, 10.0, Color.ALICEBLUE, pokemon)
         var time = 0.0
 
         enemy.entities = entities
@@ -81,14 +89,14 @@ object Trainer {
             body.alive && !enemy.alive -> roundTime - time
             body.alive && enemy.alive -> 0.0
             else -> time - roundTime
-        }
+        } * 100 + body.visitedTiles.size * 10 + body.movedDistance / 1000
     }
 
     fun ASI.mutate() {
         val brainMass = brain.allAxons
                 .flatMap { axon -> Array(axon.x) { i -> Array(axon.y) { j -> axon to Point(i, j) }.toList() }.flatMap { it }.toList() }
                 .shuffled()
-        brainMass.take(brainMass.size * 5 / 100)
+        brainMass.take(brainMass.size * 10 / 100)
                 .forEach { pair ->
                     val (axon, position) = pair
 

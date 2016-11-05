@@ -5,7 +5,7 @@ import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.entities.Wall
 import de.randomerror.genetictank.genetic.ASI
-import de.randomerror.genetictank.genetic.HumanPlayer
+import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.Trainer
 import de.randomerror.genetictank.helper.render
 import de.randomerror.genetictank.helper.transformContext
@@ -30,14 +30,15 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     var scale: Double = 1.0
     var fps = 0.0
     var ups = 0.0
+    var showTime = 30.0
 
-    var KI = Tank(150.0, 50.0, Color.ALICEBLUE, Trainer.evolve().first())
+    var KI = Tank(150.0, 10.0, Color.ALICEBLUE, Trainer.pokémon.first())
 
     init {
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
 
-        entities += Tank(500.0, 500.0, Color.SADDLEBROWN, HumanPlayer())
+        entities += Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
         entities += KI
 
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
@@ -49,7 +50,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     private fun loadLabyrinth() {
         entities.removeAll { it is Wall }
 
-        labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
+        labyrinth = LabyrinthGenerator.generate(5, 5, Random(1))
         entities += labyrinth.asWalls()
         calculateScale()
     }
@@ -70,6 +71,14 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         Mouse.poll()
         Keyboard.poll()
 
+        val deltaTime = (now - previousTime) / 1000000000.0
+        val updateDelta = Math.min(deltaTime, 1.0 / 40.0)
+
+        fps = (fps * 20 + 1 / deltaTime) / 21
+        previousTime = now
+
+        showTime -= updateDelta
+
         if (keyDown(KeyCode.L, once = true))
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
@@ -80,14 +89,21 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(81, 81, 5)))
             entities += KI
         }
+        
+        if (!KI.alive || keyDown(KeyCode.G, once = true) || showTime <= 0) {
+            GameLoop.entities.removeAll { it is Projectile || it is Wall }
+            entities += Trainer.walls
+            entities -= KI
+            
+            Trainer.evolve()
 
-        val deltaTime = (now - previousTime) / 1000000000.0
-        val updateDelta = Math.min(deltaTime, 1.0 / 40.0)
+            KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), Trainer.pokémon.first())
+            entities += KI
 
-        fps = (fps * 20 + 1 / deltaTime) / 21
-        previousTime = now
+            showTime = 30.0
+        }
 
-        entities.toList().forEach { it.update(updateDelta) }
+        entities.toList().forEach { it.update(0.016) }
     }
 
     private fun render() = gc.transformContext {
@@ -107,6 +123,6 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         val entities = mutableListOf<Entity>()
 
         var level = 1L
-        var labyrinth: Labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
+        var labyrinth: Labyrinth = LabyrinthGenerator.generate(5, 5, Random(1))
     }
 }
