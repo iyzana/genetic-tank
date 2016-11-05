@@ -45,13 +45,13 @@ object Trainer {
 
         println("best: " + fitness[0].fitness)
 
-        val surviveCount = (numPokémon * 0.2).toInt()
+        val surviveCount = (numPokémon * 0.2).toInt().coerceAtLeast(1)
         val mutateCount = (numPokémon * 0.8).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon }
 
-        pokémon += (0..mutateCount).map { i ->
-            pokémon[i].copy().apply { mutate() }
+        pokémon += (0 until mutateCount).map {
+            pokémon[0].copy().apply { mutate() }
         }
 
         return pokémon
