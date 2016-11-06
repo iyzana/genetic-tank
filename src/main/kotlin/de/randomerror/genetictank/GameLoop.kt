@@ -7,6 +7,7 @@ import de.randomerror.genetictank.entities.Wall
 import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.Trainer
+import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.helper.render
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
@@ -103,6 +104,8 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
                 fitnesses = Trainer.evolve { percentage -> evolvePercentage = percentage }
                 averages += fitnesses.sumByDouble { it.fitness } / fitnesses.size
+                
+                log.info("5th best: " + fitnesses[4].fitness)
 
                 labyrinth = Trainer.labyrinth
                 entities += Trainer.walls

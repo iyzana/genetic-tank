@@ -18,7 +18,8 @@ import kotlin.concurrent.thread
  * Created by henri on 01.11.16.
  */
 
-object Trainer{
+object Trainer {
+    private val saveFile = File("savefile.sav")
 
     val numPokémon = 1000
     private val roundTime = 30.0
@@ -58,8 +59,6 @@ object Trainer{
                 .shuffled()
                 .sortedByDescending { it.fitness }
 
-        println("best: " + fitness[0].fitness)
-
         val surviveCount = (numPokémon * 0.5).toInt().coerceAtLeast(1)
         val mutateCount = (numPokémon * 0.5).toInt()
 
@@ -79,23 +78,24 @@ object Trainer{
     }
 
     fun save() {
-        val savedata = pokémon.map(ASI::copy)
-        thread {
-            log.info("saving Generation")
-            val stream = ObjectOutputStream(FileOutputStream("savefile.sav"))
-            stream.writeObject(savedata)
-            stream.flush()
-            stream.close()
+        log.info("preparing save")
+        val saveData = pokémon.map(ASI::copy)
+        
+        thread(name = "saver", isDaemon = true) {
+            log.info("saving generation")
+            ObjectOutputStream(FileOutputStream(saveFile)).use { stream ->
+                stream.writeObject(saveData)
+                stream.flush()
+            }
             log.info("saving complete")
         }
     }
 
     fun load() {
-        val file = File("savefile.sav")
-        if(file.exists()) {
-            val stream = ObjectInputStream(FileInputStream(file))
-            pokémon = stream.readObject() as List<ASI>
-            stream.close()
+        if (saveFile.exists()) {
+            ObjectInputStream(FileInputStream(saveFile)).use { stream ->
+                pokémon = stream.readObject() as List<ASI>
+            }
         }
     }
 
