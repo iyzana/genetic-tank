@@ -23,14 +23,13 @@ import java.util.*
 import kotlin.concurrent.thread
 
 class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
-    var gc = canvas.graphicsContext2D
+    var gc: GraphicsContext = canvas.graphicsContext2D
     var previousTime = System.nanoTime()
 
 
     var translate: Point2D = Point2D(0.0, 0.0)
     var scale: Double = 1.0
     var fps = 0.0
-    var ups = 0.0
     var showTime = 30.0
 
     var KI = Tank(150.0, 10.0, Color.ALICEBLUE, Trainer.pokémon.first())
@@ -130,15 +129,15 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             val averageFitness = fitnesses.sumByDouble { it.fitness } / fitnesses.size
             val medianFitness = fitnesses[fitnesses.size / 2].fitness
 
-            fillText("fitness best: ${bestFitness}", 10.0, pos++ * 20.0)
-            fillText("fitness 5th best: ${bestFitness5}", 10.0, pos++ * 20.0
+            fillText("fitness best: $bestFitness", 10.0, pos++ * 20.0)
+            fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0
 
             transformContext {
                 fill = Color.GREEN
-                fillText("fitness median: ${medianFitness}", 10.0, pos++ * 20.0)
+                fillText("fitness median: $medianFitness", 10.0, pos++ * 20.0)
 
                 fill = Color.ORANGE
-                fillText("fitness average: ${averageFitness}", 10.0, pos++ * 20.0)
+                fillText("fitness average: $averageFitness", 10.0, pos++ * 20.0)
             }
 
             transformContext {

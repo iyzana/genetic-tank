@@ -1,7 +1,6 @@
 package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.entities.Tank
-import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Keyboard.keyDown
 import javafx.scene.input.KeyCode
 

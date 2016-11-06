@@ -82,7 +82,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     private fun collideTank() {
         entities.filter { it is Tank }
                 .map { it as Tank }
-                .filter { it.alive }
+                .filter(Tank::alive)
                 .filter { it.collides(x + radius, y + radius) }
 //                .filter { it.player !is StillPlayer && it.player !is TrainingAI }
                 .forEach {

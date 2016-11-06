@@ -22,7 +22,7 @@ class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
 
     operator fun plus(other: Matrix): Matrix {
         require(x == other.x && y == other.y) {
-            "${x}X${y} incompatible with ${other.x}X${other.y}"
+            "${x}X$y incompatible with ${other.x}X${other.y}"
         }
 
         return Matrix(x, y) { i, j ->

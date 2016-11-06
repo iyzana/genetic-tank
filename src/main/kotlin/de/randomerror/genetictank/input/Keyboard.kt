@@ -40,7 +40,7 @@ object Keyboard : EventHandler<KeyEvent> {
         val keyState = currentState[code] ?: KeyState.RELEASED
 
         return if (once) keyState == KeyState.ONCE
-        else keyState != KeyState.RELEASED;
+        else keyState != KeyState.RELEASED
     }
 
     fun ctrl() = keyDown(KeyCode.CONTROL)

@@ -2,13 +2,10 @@ package de.randomerror.genetictank.helper
 
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.entities.Wall
-import javafx.scene.canvas.GraphicsContext
-import java.awt.Point
 import java.awt.geom.AffineTransform
 import java.awt.geom.Area
 import java.awt.geom.Point2D
 import java.awt.geom.Rectangle2D
-import java.util.*
 
 /**
  * Created by Jannis on 29.10.16.
@@ -30,7 +27,7 @@ class RotatedRectangle(val x: Double, val y: Double, val width: Double, val heig
     val transformedVertices: List<Vector2D>
 
     init {
-        val dst = Array<Point2D.Double>(4) { Point2D.Double() }
+        val dst = Array(4) { Point2D.Double() }
         transform.transform(vertices, 0, dst, 0, 4)
         transformedVertices = dst.map(::Vector2D)
     }

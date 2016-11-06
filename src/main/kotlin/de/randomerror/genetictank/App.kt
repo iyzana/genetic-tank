@@ -1,6 +1,5 @@
 package de.randomerror.genetictank
 
-import de.randomerror.genetictank.helper.Matrix
 import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
