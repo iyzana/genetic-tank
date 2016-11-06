@@ -2,6 +2,7 @@ package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Tank
+import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.helper.shuffled
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import de.randomerror.genetictank.labyrinth.Point
@@ -80,10 +81,10 @@ object Trainer{
     fun save() {
         val savedata = pokémon.map(ASI::copy)
         Thread {
-            println("saving Generation")
+            log.info("saving Generation")
             val stream = ObjectOutputStream(FileOutputStream("savefile.sav"))
             stream.writeObject(savedata)
-            println("saving complete")
+            log.info("saving complete")
         }
     }
 

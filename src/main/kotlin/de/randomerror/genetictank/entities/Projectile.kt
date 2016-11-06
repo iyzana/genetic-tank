@@ -17,6 +17,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     val radius = 3.0
 
     var alive = true
+    var remainingBounces = 11
 
     init {
         this.x = x - radius
@@ -60,8 +61,11 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
                 .filter { Math.abs(x - it.x) < 200 && Math.abs(y - it.y) < 200 }
                 .filter { it.collides(newX + radius, curY + radius) || it.collides(curX + radius, newY + radius) }
 
+        var bounced = false
+
         walls.firstOrNull { it.collides(newX + radius, curY + radius) }?.let { wall ->
             velX = -velX
+            bounced = true
 
             x = if (x + radius < wall.x + wall.width / 2)
                 wall.x - radius * 2
@@ -71,11 +75,17 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
 
         walls.firstOrNull { it.collides(curX + radius, newY + radius) }?.let { wall ->
             velY = -velY
+            bounced = true
 
             y = if (y + radius < wall.y + wall.height / 2)
                 wall.y - radius * 2
             else
                 wall.y + wall.height
+        }
+
+        if (bounced) {
+            if (remainingBounces > 0) remainingBounces--
+            else alive = false
         }
     }
 
