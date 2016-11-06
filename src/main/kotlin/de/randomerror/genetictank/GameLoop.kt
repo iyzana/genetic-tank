@@ -109,6 +109,8 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         clearRect(0.0, 0.0, canvas.width, canvas.height)
 
         fillText("fps: ${fps.toInt()}", 10.0, 20.0)
+        fillText("generation: ${Trainer.generation}", 10.0, 36.0)
+        fillText("fitness: ${Trainer.bestFitness}", 10.0, 55.0)
 
         transformContext {
             translate(translate.x, translate.y)

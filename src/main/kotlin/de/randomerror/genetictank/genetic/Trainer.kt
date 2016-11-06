@@ -21,7 +21,7 @@ object Trainer {
     private val roundTime = 30.0
 
     var pokémon = (0 until numPokémon).map {
-        ASI(listOf(81, 81, 5))
+        ASI(listOf(81, 81, 81, 40, 5))
     }
 
     val deltaTime = 0.016
@@ -29,6 +29,8 @@ object Trainer {
     private var labIndex = 1L
     private var labyrinth = LabyrinthGenerator.generate(5, 5, Random(0))
     var walls = labyrinth.asWalls()
+    var generation = 0
+    var bestFitness = 0.0
 
     private data class PokemonFitness(val pokemon: ASI, val fitness: Double) {
         init {
@@ -48,6 +50,7 @@ object Trainer {
                 .sortedByDescending { it.fitness }
 
         println("best: " + fitness[0].fitness)
+        bestFitness = fitness[0].fitness
 
         val surviveCount = (numPokémon * 0.3).toInt().coerceAtLeast(1)
         val mutateCount = (numPokémon * 0.7).toInt()
@@ -57,6 +60,8 @@ object Trainer {
         pokémon += (0 until mutateCount).map {
             pokémon[(Math.random() * pokémon.size).toInt()].copy().apply { mutate() }
         }
+
+        generation++
 
         return pokémon
     }
