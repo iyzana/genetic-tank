@@ -82,10 +82,13 @@ object Trainer{
     }
 
     fun save() {
-        println("saving Generation")
-        val stream = ObjectOutputStream(FileOutputStream("savefile.sav"))
-        stream.writeObject(pokémon)
-        println("saving complete")
+        val savedata = pokémon.map(ASI::copy)
+        Thread {
+            println("saving Generation")
+            val stream = ObjectOutputStream(FileOutputStream("savefile.sav"))
+            stream.writeObject(savedata)
+            println("saving complete")
+        }
     }
 
     fun load() {
