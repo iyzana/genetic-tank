@@ -10,7 +10,7 @@ import java.io.Serializable
 /**
  * Created by henri on 01.11.16.
  */
-class ASI(val layers: List<Int> = listOf(83, 83, 40, 5)) : Player, Serializable {
+class ASI(val layers: List<Int> = listOf(83, 83, 83, 40, 5)) : Player, Serializable {
     var time = 0.0
     
     lateinit var idea: Matrix

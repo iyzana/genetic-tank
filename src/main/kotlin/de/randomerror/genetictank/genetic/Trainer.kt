@@ -93,9 +93,11 @@ object Trainer {
 
     fun load() {
         if (saveFile.exists()) {
+            log.info("loading generation")
             ObjectInputStream(FileInputStream(saveFile)).use { stream ->
                 pokémon = stream.readObject() as List<ASI>
             }
+            log.info("loading complete")
         }
     }
 

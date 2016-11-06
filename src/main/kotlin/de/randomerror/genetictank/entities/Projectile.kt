@@ -52,6 +52,9 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
         y += velY * deltaTime
 
         collideTank()
+        
+        if(!alive)
+            entities.remove(this@Projectile)
     }
 
     private fun collideWalls(curX: Double, curY: Double, newX: Double, newY: Double) {
@@ -97,7 +100,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
 //                .filter { it.player !is StillPlayer && it.player !is TrainingAI }
                 .forEach {
                     it.alive = false
-                    entities.remove(this@Projectile)
+                    alive = false
                 }
     }
 
