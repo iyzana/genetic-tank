@@ -183,7 +183,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             transformContext {
                 //render median
                 fill = Color.GREEN
-                fillOval((fitnesses.size / 2) * xAxisScale, fitnesses[fitnesses.size / 2].fitness*yAxisScale - 4.0, 8.0, 8.0)
+                fillOval((fitnesses.size / 2) * xAxisScale - 4.0, fitnesses[fitnesses.size / 2].fitness*yAxisScale - 4.0, 8.0, 8.0)
 
                 //render average
                 stroke = Color.ORANGE
