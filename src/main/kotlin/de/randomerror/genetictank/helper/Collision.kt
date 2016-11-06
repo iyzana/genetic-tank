@@ -50,7 +50,7 @@ class RotatedRectangle(val x: Double, val y: Double, val width: Double, val heig
     fun collidesWith(x: Double, y: Double): Boolean {
         val rotated = transform.inverseTransform(Point2D.Double(x, y), Point2D.Double())
 
-        return rotated.x >= x && rotated.x <= (x + width) && rotated.y >= y && rotated.y <= (y + height)
+        return (rotated.x > this.x) && (rotated.x < (this.x + width)) && (rotated.y > this.y) && (rotated.y < (this.y + height))
     }
 
     fun collidesWith(other: RotatedRectangle): Boolean {
@@ -63,7 +63,7 @@ class RotatedRectangle(val x: Double, val y: Double, val width: Double, val heig
                     val (min0, max0) = projectToAxis(axis, transformedVertices)
                     val (min1, max1) = projectToAxis(axis, other.transformedVertices)
 
-                    (max0 > min1 && min1 > min0) || (max1 > min0 && min0 > min1)
+                    (max0 > min1 && min1 >= min0) || (max1 > min0 && min0 >= min1)
                 }
     }
 

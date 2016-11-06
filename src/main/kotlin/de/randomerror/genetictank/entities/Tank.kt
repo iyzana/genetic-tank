@@ -92,6 +92,9 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
             val testBoundsH = RotatedRectangle(x, y, width, height, testH)
             walls.filter { testBoundsH.collidesWith(it.bounds.toRotatedRectangle()) }.forEach { wall ->
                 val collision = testBoundsH.collisionArea(wall.bounds)
+
+                if(collision.area.isEmpty) return@forEach
+
                 val midX = collision.x + collision.width / 2
                 val midY = collision.y + collision.height / 2
 
