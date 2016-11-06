@@ -42,6 +42,8 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     var evolveThread: Thread? = null
 
     init {
+        log.info("running with ${Runtime.getRuntime().availableProcessors()} threads")
+        
         Trainer.load()
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
@@ -96,7 +98,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         if (keyDown(KeyCode.F5, once = true))
             Trainer.save()
 
-        if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 0) {
+        if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 40) {
             entities.clear()
 
             evolveThread = thread(isDaemon = true, name = "evolver") {
@@ -104,8 +106,14 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
                 fitnesses = Trainer.evolve { percentage -> evolvePercentage = percentage }
                 averages += fitnesses.sumByDouble { it.fitness } / fitnesses.size
-                
-                log.info("5th best: " + fitnesses[4].fitness)
+
+                val bestFitness = fitnesses.first().fitness
+                val bestFitness5 = fitnesses[4].fitness
+                val worstFitness = fitnesses.last().fitness
+                val averageFitness = averages.last()
+                val medianFitness = fitnesses[fitnesses.size / 2].fitness
+
+                log.info("best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
 
                 labyrinth = Trainer.labyrinth
                 entities += Trainer.walls
@@ -164,8 +172,8 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 val yAxisScale = 0.5
                 renderGraph(gc, xAxisScale, yAxisScale)
 
-                gc.translate(0.0, (fitnesses.first().fitness - fitnesses.last().fitness)*yAxisScale+40.0)
-                renderTimelineGraph(gc, fitnesses.size*xAxisScale, yAxisScale)
+                gc.translate(0.0, (fitnesses.first().fitness - fitnesses.last().fitness) * yAxisScale + 40.0)
+                renderTimelineGraph(gc, fitnesses.size * xAxisScale, yAxisScale)
             }
         }
 
@@ -191,7 +199,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                             (0 until vector.y).map { vector[it] }.forEachIndexed { index, value ->
                                 fill = Color.color(1 - value, 1 - value, 1 - value)
                                 fillRect(layer * 20.0 + 140.0, index * 15.0 - 10.0, 20.0, 15.0)
-                                
+
                                 fill = Color.RED
                                 fillText("${(value * 10).toInt()}", layer * 20.0 + 140.0, index * 15.0)
                             }
@@ -209,13 +217,13 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
     fun renderGraph(gc: GraphicsContext, xAxisScale: Double, yAxisScale: Double) = gc.transformContext {
 
-        val minYVal = (fitnesses.last().fitness)*yAxisScale
-        val maxYVal = (fitnesses.first().fitness)*yAxisScale
+        val minYVal = (fitnesses.last().fitness) * yAxisScale
+        val maxYVal = (fitnesses.first().fitness) * yAxisScale
 
         val minXVal = 0.0
-        val maxXVal = fitnesses.size.toDouble()*xAxisScale
+        val maxXVal = fitnesses.size.toDouble() * xAxisScale
 
-        translate(0.0, (maxYVal-minYVal)*yAxisScale)
+        translate(0.0, (maxYVal - minYVal) * yAxisScale)
 
         transform(1.0, 0.0,
                 0.0, -1.0,
@@ -237,7 +245,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             transformContext {
                 //render median
                 fill = Color.GREEN
-                fillOval((fitnesses.size / 2) * xAxisScale - 4.0, fitnesses[fitnesses.size / 2].fitness*yAxisScale - 4.0, 8.0, 8.0)
+                fillOval((fitnesses.size / 2) * xAxisScale - 4.0, fitnesses[fitnesses.size / 2].fitness * yAxisScale - 4.0, 8.0, 8.0)
 
                 fill = Color.PURPLE
                 fillOval((fitnesses.size - 5) * xAxisScale - 4.0, fitnesses[4].fitness * yAxisScale - 4.0, 8.0, 8.0)
@@ -248,7 +256,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 strokeLine(minXVal, average * yAxisScale, maxXVal, average * yAxisScale)
             }
 
-            fillText("0", minXVal-12.0, 5.0)
+            fillText("0", minXVal - 12.0, 5.0)
         }
         //render y-Axis
         strokeLine(minXVal, minYVal, minXVal, maxYVal)
@@ -258,15 +266,15 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
     fun renderTimelineGraph(gc: GraphicsContext, width: Double, yAxisScale: Double) = gc.transformContext {
         //render averages Graph
-        val xAxisScale = width/Math.max(averages.size-1, 1)
+        val xAxisScale = width / Math.max(averages.size - 1, 1)
 
-        val minYVal = (averages.first()-10)*yAxisScale
-        val maxYVal = (averages.last()+10)*yAxisScale
+        val minYVal = (averages.first() - 10) * yAxisScale
+        val maxYVal = (averages.last() + 10) * yAxisScale
 
         val minXVal = 0.0
-        val maxXVal = (averages.size.toDouble()-1)*xAxisScale
+        val maxXVal = (averages.size.toDouble() - 1) * xAxisScale
 
-        translate(0.0, (maxYVal-minYVal)*yAxisScale)
+        translate(0.0, (maxYVal - minYVal) * yAxisScale)
 
         transform(1.0, 0.0,
                 0.0, -1.0,
@@ -276,7 +284,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         stroke = Color.ORANGE
         beginPath()
         averages.forEachIndexed { i, average ->
-            lineTo(i.toDouble()*xAxisScale, average*yAxisScale)
+            lineTo(i.toDouble() * xAxisScale, average * yAxisScale)
         }
         stroke()
 
@@ -287,7 +295,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             //render x-Axis
             strokeLine(minXVal, 0.0, maxXVal, 0.0)
 
-            fillText("0", minXVal-12.0, 5.0)
+            fillText("0", minXVal - 12.0, 5.0)
         }
         //render y-Axis
         strokeLine(minXVal, minYVal, minXVal, maxYVal)
