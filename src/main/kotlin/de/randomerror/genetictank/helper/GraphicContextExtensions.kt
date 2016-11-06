@@ -6,7 +6,7 @@ import javafx.scene.canvas.GraphicsContext
 /**
  * Run the provided code block on the GraphicsContext and reset the transform afterwards
  */
-fun GraphicsContext.transformContext(block: GraphicsContext.() -> Unit) {
+inline fun GraphicsContext.transformContext(block: GraphicsContext.() -> Unit) {
     save()
     block()
     restore()

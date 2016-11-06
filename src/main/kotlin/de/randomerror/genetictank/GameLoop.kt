@@ -122,19 +122,27 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         var pos = 1
 
         fillText("fps: ${fps.toInt()}", 10.0, pos++ * 20.0)
+        pos++
+
         fillText("generation: ${Trainer.generation}", 10.0, pos++ * 20.0)
         fillText("evolving: ${(evolvePercentage * 100).toInt()}%", 10.0, pos++ * 20.0)
+        fillText("time remaining: ${showTime.toInt()}", 10.0, pos++ * 20.0)
+        pos++
 
         if (!fitnesses.isEmpty()) {
             val bestFitness = fitnesses.first().fitness
             val bestFitness5 = fitnesses[4].fitness
+            val worstFitness = fitnesses.last().fitness
             val averageFitness = averages.last()
             val medianFitness = fitnesses[fitnesses.size / 2].fitness
 
             fillText("fitness best: $bestFitness", 10.0, pos++ * 20.0)
-            fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0)
+            fillText("fitness worst: $worstFitness", 10.0, pos++ * 20.0)
 
             transformContext {
+                fill = Color.PURPLE
+                fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0)
+                
                 fill = Color.GREEN
                 fillText("fitness median: $medianFitness", 10.0, pos++ * 20.0)
 
@@ -172,12 +180,12 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         translate(0.0, (maxYVal-minYVal)*yAxisScale)
 
         transform(1.0, 0.0,
-                  0.0, -1.0,
-                  0.0, 0.0)
+                0.0, -1.0,
+                0.0, 0.0)
         lineWidth = 3.0
         beginPath()
         fitnesses.reversed().forEachIndexed { i, fitness ->
-            lineTo(i.toDouble()*xAxisScale, fitness.fitness*yAxisScale)
+            lineTo(i.toDouble() * xAxisScale, fitness.fitness * yAxisScale)
         }
         stroke()
 
@@ -192,6 +200,9 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 //render median
                 fill = Color.GREEN
                 fillOval((fitnesses.size / 2) * xAxisScale - 4.0, fitnesses[fitnesses.size / 2].fitness*yAxisScale - 4.0, 8.0, 8.0)
+
+                fill = Color.PURPLE
+                fillOval((fitnesses.size - 5) * xAxisScale - 4.0, fitnesses[4].fitness * yAxisScale - 4.0, 8.0, 8.0)
 
                 //render average
                 stroke = Color.ORANGE
