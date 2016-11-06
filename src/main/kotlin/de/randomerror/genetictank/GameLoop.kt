@@ -130,7 +130,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             val medianFitness = fitnesses[fitnesses.size / 2].fitness
 
             fillText("fitness best: $bestFitness", 10.0, pos++ * 20.0)
-            fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0
+            fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0)
 
             transformContext {
                 fill = Color.GREEN
