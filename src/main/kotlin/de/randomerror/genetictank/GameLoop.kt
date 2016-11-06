@@ -43,7 +43,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
     init {
         log.info("running with ${Runtime.getRuntime().availableProcessors().coerceAtMost(32)} threads")
-        
+
         Trainer.load()
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
@@ -106,7 +106,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
                 fitnesses = Trainer.evolve { percentage -> evolvePercentage = percentage }
                 averages += fitnesses.sumByDouble { it.fitness } / fitnesses.size
-                
+
                 val bestFitness = fitnesses.first().fitness
                 val bestFitness5 = fitnesses[4].fitness
                 val worstFitness = fitnesses.last().fitness
@@ -133,85 +133,89 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     }
 
     private fun render() = gc.transformContext {
-        clearRect(0.0, 0.0, canvas.width, canvas.height)
+        try {
+            clearRect(0.0, 0.0, canvas.width, canvas.height)
 
-        var pos = 1
+            var pos = 1
 
-        fillText("fps: ${fps.toInt()}", 10.0, pos++ * 20.0)
-        pos++
+            fillText("fps: ${fps.toInt()}", 10.0, pos++ * 20.0)
+            pos++
 
-        fillText("generation: ${Trainer.generation}", 10.0, pos++ * 20.0)
-        fillText("evolving: ${(evolvePercentage * 100).toInt()}%", 10.0, pos++ * 20.0)
-        fillText("time remaining: ${showTime.toInt()}", 10.0, pos++ * 20.0)
-        pos++
+            fillText("generation: ${Trainer.generation}", 10.0, pos++ * 20.0)
+            fillText("evolving: ${(evolvePercentage * 100).toInt()}%", 10.0, pos++ * 20.0)
+            fillText("time remaining: ${showTime.toInt()}", 10.0, pos++ * 20.0)
+            pos++
 
-        if (!fitnesses.isEmpty()) {
-            val bestFitness = fitnesses.first().fitness
-            val bestFitness5 = fitnesses[4].fitness
-            val worstFitness = fitnesses.last().fitness
-            val averageFitness = averages.last()
-            val medianFitness = fitnesses[fitnesses.size / 2].fitness
+            if (!fitnesses.isEmpty()) {
+                val bestFitness = fitnesses.first().fitness
+                val bestFitness5 = fitnesses[4].fitness
+                val worstFitness = fitnesses.last().fitness
+                val averageFitness = averages.last()
+                val medianFitness = fitnesses[fitnesses.size / 2].fitness
 
-            fillText("fitness best: $bestFitness", 10.0, pos++ * 20.0)
-            fillText("fitness worst: $worstFitness", 10.0, pos++ * 20.0)
+                fillText("fitness best: $bestFitness", 10.0, pos++ * 20.0)
+                fillText("fitness worst: $worstFitness", 10.0, pos++ * 20.0)
 
-            transformContext {
-                fill = Color.PURPLE
-                fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0)
+                transformContext {
+                    fill = Color.PURPLE
+                    fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0)
 
-                fill = Color.GREEN
-                fillText("fitness median: $medianFitness", 10.0, pos++ * 20.0)
+                    fill = Color.GREEN
+                    fillText("fitness median: $medianFitness", 10.0, pos++ * 20.0)
 
-                fill = Color.ORANGE
-                fillText("fitness average: $averageFitness", 10.0, pos++ * 20.0)
+                    fill = Color.ORANGE
+                    fillText("fitness average: $averageFitness", 10.0, pos++ * 20.0)
+                }
+
+                transformContext {
+                    gc.translate(25.0, pos++ * 20.0)
+                    val xAxisScale = 0.5
+                    val yAxisScale = 0.5
+                    renderGraph(gc, xAxisScale, yAxisScale)
+
+                    gc.translate(0.0, (fitnesses.first().fitness - fitnesses.last().fitness) * yAxisScale + 40.0)
+                    renderTimelineGraph(gc, fitnesses.size * xAxisScale, yAxisScale)
+                }
             }
 
             transformContext {
-                gc.translate(25.0, pos++ * 20.0)
-                val xAxisScale = 0.5
-                val yAxisScale = 0.5
-                renderGraph(gc, xAxisScale, yAxisScale)
+                translate(canvas.width - 250.0, 50.0)
 
-                gc.translate(0.0, (fitnesses.first().fitness - fitnesses.last().fitness) * yAxisScale + 40.0)
-                renderTimelineGraph(gc, fitnesses.size * xAxisScale, yAxisScale)
-            }
-        }
+                entities.filter { it is Tank }
+                        .map { it as Tank }
+                        .map(Tank::player)
+                        .filter { it is ASI }
+                        .map { it as ASI }
+                        .filter { it.time > 0.0 }
+                        .take(1)
+                        .map { it.brain.getThinkData(it.idea) }
+                        .singleOrNull()
+                        ?.let { thinkData ->
+                            val input = thinkData[0]
+                            (0 until input.y).map { input[it] }.forEachIndexed { index, value ->
+                                fillText("$value", 0.0, index * 15.0)
+                            }
 
-        transformContext {
-            translate(canvas.width - 250.0, 50.0)
+                            thinkData.drop(1).forEachIndexed { layer, vector ->
+                                (0 until vector.y).map { vector[it] }.forEachIndexed { index, value ->
+                                    fill = Color.color(1 - value, 1 - value, 1 - value)
+                                    fillRect(layer * 20.0 + 140.0, index * 15.0 - 10.0, 20.0, 15.0)
 
-            entities.filter { it is Tank }
-                    .map { it as Tank }
-                    .map(Tank::player)
-                    .filter { it is ASI }
-                    .map { it as ASI }
-                    .filter { it.time > 0.0 }
-                    .take(1)
-                    .map { it.brain.getThinkData(it.idea) }
-                    .singleOrNull()
-                    ?.let { thinkData ->
-                        val input = thinkData[0]
-                        (0 until input.y).map { input[it] }.forEachIndexed { index, value ->
-                            fillText("$value", 0.0, index * 15.0)
-                        }
-
-                        thinkData.drop(1).forEachIndexed { layer, vector ->
-                            (0 until vector.y).map { vector[it] }.forEachIndexed { index, value ->
-                                fill = Color.color(1 - value, 1 - value, 1 - value)
-                                fillRect(layer * 20.0 + 140.0, index * 15.0 - 10.0, 20.0, 15.0)
-
-                                fill = Color.RED
-                                fillText("${(value * 10).toInt()}", layer * 20.0 + 140.0, index * 15.0)
+                                    fill = Color.RED
+                                    fillText("${(value * 10).toInt()}", layer * 20.0 + 140.0, index * 15.0)
+                                }
                             }
                         }
-                    }
-        }
+            }
 
-        transformContext {
-            translate(translate.x, translate.y)
-            scale(scale, scale)
+            transformContext {
+                translate(translate.x, translate.y)
+                scale(scale, scale)
 
-            entities.asReversed().forEach { render(it) }
+                entities.asReversed().forEach { render(it) }
+            }
+        } catch(e: Exception) {
+            log.error("exception while rendering scene", e)
         }
     }
 
