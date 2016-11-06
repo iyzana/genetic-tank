@@ -21,7 +21,7 @@ object Trainer {
     private val roundTime = 30.0
 
     var pokémon = (0 until numPokémon).map {
-        ASI(listOf(82, 82, 81, 40, 5))
+        ASI(listOf(83, 83, 40, 5))
     }
 
     val deltaTime = 0.016

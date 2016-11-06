@@ -51,7 +51,8 @@ class ASI(val layers: List<Int>) : Player {
             }
         }
         
-        idea[index++] = if(body.collides) 1.0 else 0.0
+        idea[index++] = if(body.collidesX) 1.0 else 0.0
+        idea[index++] = if(body.collidesY) 1.0 else 0.0
         
         stateOfMind = brain.thinkAbout(idea)
         time += deltaTime

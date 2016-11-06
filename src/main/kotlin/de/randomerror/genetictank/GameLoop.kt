@@ -104,22 +104,26 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     private fun render() = gc.transformContext {
         clearRect(0.0, 0.0, canvas.width, canvas.height)
 
-        val bestFitness = fitnesses.first().fitness
-        val averageFitness = fitnesses.sumByDouble { it.fitness } / fitnesses.size
-        val medianFitness = fitnesses[fitnesses.size / 2].fitness
-
         fillText("fps: ${fps.toInt()}", 10.0, 20.0)
         fillText("generation: ${Trainer.generation}", 10.0, 40.0)
-        fillText("fitness best: ${Trainer.bestFitness}", 10.0, 60.0)
-        fillText("fitness 5th best: ${Trainer.bestFitness5}", 10.0, 60.0)
-        fillText("fitness median: ${Trainer.medianFitness}", 10.0, 80.0)
-        fillText("fitness average: ${Trainer.averageFitness}", 10.0, 100.0)
 
-        transformContext {
-            gc.translate(25.0, 250.0)
-            renderGraph(gc)
+        if (!fitnesses.isEmpty()) {
+            val bestFitness = fitnesses.first().fitness
+            val bestFitness5 = fitnesses[4].fitness
+            val averageFitness = fitnesses.sumByDouble { it.fitness } / fitnesses.size
+            val medianFitness = fitnesses[fitnesses.size / 2].fitness
+
+            fillText("fitness best: ${bestFitness}", 10.0, 60.0)
+            fillText("fitness 5th best: ${bestFitness5}", 10.0, 80.0)
+            fillText("fitness median: ${medianFitness}", 10.0, 100.0)
+            fillText("fitness average: ${averageFitness}", 10.0, 120.0)
+
+            transformContext {
+                gc.translate(25.0, 250.0)
+                renderGraph(gc)
+            }
         }
-        
+
         transformContext {
             translate(translate.x, translate.y)
             scale(scale, scale)
@@ -132,13 +136,13 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         val valueScale = 0.1
 
         transform(1.0, 0.0,
-                  0.0, -1.0,
-                  0.0, 0.0)
+                0.0, -1.0,
+                0.0, 0.0)
         scale(.5, .5)
         lineWidth = 3.0
         beginPath()
         fitnesses.reversed().forEachIndexed { i, fitness ->
-            lineTo(i.toDouble(), fitness.fitness*valueScale)
+            lineTo(i.toDouble(), fitness.fitness * valueScale)
         }
         stroke()
 
@@ -150,7 +154,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             scale(2.0, 2.0)
             fillText("0", -10.0, 5.0)
         }
-        strokeLine(0.0, (fitnesses.last().fitness-10)*valueScale, 0.0, (fitnesses.first().fitness+10)*valueScale)
+        strokeLine(0.0, (fitnesses.last().fitness - 10) * valueScale, 0.0, (fitnesses.first().fitness + 10) * valueScale)
     }
 
     companion object {
