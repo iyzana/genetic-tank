@@ -27,7 +27,7 @@ object Trainer {
     val deltaTime = 0.016
 
     private var labIndex = 1L
-    private var labyrinth = LabyrinthGenerator.generate(5, 5, Random(0))
+    var labyrinth = LabyrinthGenerator.generate(5, 5, Random(0))
     var walls = labyrinth.asWalls()
     var generation = 0
     var bestFitness = 0.0

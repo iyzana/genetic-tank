@@ -77,8 +77,6 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         fps = (fps * 20 + 1 / deltaTime) / 21
         previousTime = now
 
-        showTime -= updateDelta
-
         if (keyDown(KeyCode.L, once = true))
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
@@ -94,6 +92,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             GameLoop.entities.clear()
             Trainer.evolve()
 
+            labyrinth = Trainer.labyrinth
             entities += Trainer.walls
 
             entities += Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
@@ -103,6 +102,8 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         }
 
         entities.toList().forEach { it.update(0.016) }
+
+        showTime -= 0.016
     }
 
     private fun render() = gc.transformContext {
