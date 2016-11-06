@@ -42,7 +42,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     var evolveThread: Thread? = null
 
     init {
-        log.info("running with ${Runtime.getRuntime().availableProcessors()} threads")
+        log.info("running with ${Runtime.getRuntime().availableProcessors().coerceAtMost(32)} threads")
         
         Trainer.load()
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
