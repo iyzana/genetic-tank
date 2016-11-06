@@ -30,17 +30,14 @@ object Trainer {
     var labyrinth = LabyrinthGenerator.generate(5, 5, Random(0))
     var walls = labyrinth.asWalls()
     var generation = 0
-    var bestFitness = 0.0
-    var averageFitness = 0.0
-    var medianFitness = 0.0
 
-    private data class PokemonFitness(val pokemon: ASI, val fitness: Double) {
+    data class PokemonFitness(val pokemon: ASI, val fitness: Double) {
         init {
             println(fitness)
         }
     }
 
-    fun evolve(): List<ASI> {
+    fun evolve(): List<PokemonFitness> {
         fun ASI.toFitnessChecker() = Callable<PokemonFitness> { PokemonFitness(this, train(this)) }
 
         labyrinth = LabyrinthGenerator.generate(5, 5, Random(labIndex++))
@@ -52,9 +49,6 @@ object Trainer {
                 .sortedByDescending { it.fitness }
 
         println("best: " + fitness[0].fitness)
-        bestFitness = fitness[0].fitness
-        averageFitness = fitness.sumByDouble { it.fitness } / fitness.size
-        medianFitness = fitness[fitness.size / 2].fitness
 
         val surviveCount = (numPokémon * 0.3).toInt().coerceAtLeast(1)
         val mutateCount = (numPokémon * 0.7).toInt()
@@ -67,7 +61,7 @@ object Trainer {
 
         generation++
 
-        return pokémon
+        return fitness
     }
 
     fun train(pokemon: ASI): Double {
