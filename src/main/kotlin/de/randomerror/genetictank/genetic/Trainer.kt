@@ -19,8 +19,6 @@ import kotlin.concurrent.thread
  */
 
 object Trainer {
-    private val saveFile = File("savefile.sav")
-
     val numPokémon = 1000
     private val roundTime = 30.0
 
@@ -78,11 +76,13 @@ object Trainer {
     }
 
     fun save() {
+        val saveFile = File("savefile-$generation.sav")
+        
         log.info("preparing save")
         val saveData = pokémon.map(ASI::copy)
         
         thread(name = "saver", isDaemon = true) {
-            log.info("saving generation")
+            log.info("saving generation $generation")
             ObjectOutputStream(FileOutputStream(saveFile)).use { stream ->
                 stream.writeObject(saveData)
                 stream.flush()
@@ -92,6 +92,7 @@ object Trainer {
     }
 
     fun load() {
+        val saveFile = File("savefile.sav")
         if (saveFile.exists()) {
             log.info("loading generation")
             ObjectInputStream(FileInputStream(saveFile)).use { stream ->

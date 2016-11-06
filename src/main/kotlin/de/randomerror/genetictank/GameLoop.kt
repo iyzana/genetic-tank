@@ -95,7 +95,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         if (keyDown(KeyCode.C, once = true))
             GameLoop.entities.removeAll { it is Projectile }
 
-        if (keyDown(KeyCode.F5, once = true))
+        if (keyDown(KeyCode.F5, once = true) || Trainer.generation % 100 == 0)
             Trainer.save()
 
         if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 40) {
@@ -106,14 +106,14 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
                 fitnesses = Trainer.evolve { percentage -> evolvePercentage = percentage }
                 averages += fitnesses.sumByDouble { it.fitness } / fitnesses.size
-
+                
                 val bestFitness = fitnesses.first().fitness
                 val bestFitness5 = fitnesses[4].fitness
                 val worstFitness = fitnesses.last().fitness
                 val averageFitness = averages.last()
                 val medianFitness = fitnesses[fitnesses.size / 2].fitness
 
-                log.info("best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
+                log.info("generation: ${Trainer.generation}, best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
 
                 labyrinth = Trainer.labyrinth
                 entities += Trainer.walls
