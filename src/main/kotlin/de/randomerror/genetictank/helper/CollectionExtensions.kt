@@ -10,4 +10,6 @@ fun <K, V> Map<K, V>.forEach(block: (K, V) -> Unit): Unit = this.forEach { block
 
 operator fun <T> Array<Array<T>>.get(i: Int, j: Int) = this[i][j]
 
+operator fun <T> Collection<T>.get(range: IntRange) = this.filterIndexed { index, _value -> index in range }
+
 fun <T> List<T>.shuffled(random: Random = Random()) = apply { Collections.shuffle(this, random) }

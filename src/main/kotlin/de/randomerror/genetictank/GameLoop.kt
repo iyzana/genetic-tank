@@ -4,6 +4,7 @@ import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.entities.Wall
+import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.Trainer
 import de.randomerror.genetictank.helper.render
@@ -91,7 +92,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             GameLoop.entities.removeAll { it is Projectile }
 
         if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 0) {
-            GameLoop.entities.clear()
+            entities.clear()
 
             evolveThread = thread(isDaemon = true, name = "evolver") {
                 evolvePercentage = 0.0
@@ -142,7 +143,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             transformContext {
                 fill = Color.PURPLE
                 fillText("fitness 5th best: $bestFitness5", 10.0, pos++ * 20.0)
-                
+
                 fill = Color.GREEN
                 fillText("fitness median: $medianFitness", 10.0, pos++ * 20.0)
 
@@ -159,6 +160,36 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 gc.translate(0.0, (fitnesses.first().fitness - fitnesses.last().fitness)*yAxisScale+40.0)
                 renderTimelineGraph(gc, fitnesses.size*xAxisScale, yAxisScale)
             }
+        }
+
+        transformContext {
+            translate(canvas.width - 250.0, 50.0)
+
+            entities.filter { it is Tank }
+                    .map { it as Tank }
+                    .map(Tank::player)
+                    .filter { it is ASI }
+                    .map { it as ASI }
+                    .filter { it.time > 0.0 }
+                    .take(1)
+                    .map { it.brain.getThinkData(it.idea) }
+                    .singleOrNull()
+                    ?.let { thinkData ->
+                        val input = thinkData[0]
+                        (0 until input.y).map { input[it] }.forEachIndexed { index, value ->
+                            fillText("$value", 0.0, index * 15.0)
+                        }
+
+                        thinkData.drop(1).forEachIndexed { layer, vector ->
+                            (0 until vector.y).map { vector[it] }.forEachIndexed { index, value ->
+                                fill = Color.color(1 - value, 1 - value, 1 - value)
+                                fillRect(layer * 20.0 + 140.0, index * 15.0 - 10.0, 20.0, 15.0)
+                                
+                                fill = Color.RED
+                                fillText("${(value * 10).toInt()}", layer * 20.0 + 140.0, index * 15.0)
+                            }
+                        }
+                    }
         }
 
         transformContext {

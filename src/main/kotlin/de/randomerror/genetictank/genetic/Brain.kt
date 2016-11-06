@@ -23,6 +23,17 @@ class Brain(val layerCounts: List<Int>) {
             return sigmoid(weight * result + bias)
         }
     }
+    
+    fun getThinkData(idea: Matrix): List<Matrix> {
+        val data = mutableListOf<Matrix>(idea)
+        theNetwork.fold(idea) { result, layer ->
+            val (bias, weight) = layer
+            val layerResult = sigmoid(weight * result + bias)
+            data.add(layerResult)
+            return@fold layerResult
+        }
+        return data
+    }
 
     private fun sigmoid(vector: Matrix): Matrix {
         require(vector.x == 1)

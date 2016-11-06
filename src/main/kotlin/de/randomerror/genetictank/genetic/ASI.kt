@@ -12,18 +12,19 @@ import de.randomerror.genetictank.labyrinth.Point
 class ASI(val layers: List<Int> = listOf(83, 83, 40, 5)) : Player {
     var time = 0.0
     
+    lateinit var idea: Matrix
     var brain = Brain(layers)
     var stateOfMind = Matrix(1, layers.last(), { i, j -> 0.0 })
 
     override fun update(deltaTime: Double, body: Tank) {
-        val idea = sense(body)
+        sense(body)
 
         stateOfMind = brain.thinkAbout(idea)
         time += deltaTime
     }
 
-    private fun sense(body: Tank): Matrix {
-        val idea = Matrix(1, layers.first(), { i, j -> 0.0 })
+    private fun sense(body: Tank) {
+        idea = Matrix(1, layers.first(), { i, j -> 0.0 })
 
         var index = 0
         val enemy = body.entities.filter { it != body && it is Tank }.first() as Tank
@@ -31,8 +32,8 @@ class ASI(val layers: List<Int> = listOf(83, 83, 40, 5)) : Player {
         idea[index++] = time
         idea[index++] = enemy.x - body.x
         idea[index++] = enemy.y - body.y
-        idea[index++] = enemy.heading
-        idea[index++] = body.heading
+        idea[index++] = normalizeHeading(enemy.heading)
+        idea[index++] = normalizeHeading(body.heading)
 
         body.entities.asSequence().filter { it is Projectile }.take(10).forEachIndexed { i, entity ->
             idea[index++] = entity.x - body.x
@@ -59,8 +60,11 @@ class ASI(val layers: List<Int> = listOf(83, 83, 40, 5)) : Player {
 
         idea[index++] = if (body.collidesX) 1.0 else 0.0
         idea[index++] = if (body.collidesY) 1.0 else 0.0
-        
-        return idea
+    }
+    
+    private fun normalizeHeading(heading: Double): Double {
+        val mod = heading % (2 * Math.PI)
+        return if(mod < 0) mod + (2 * Math.PI) else mod
     }
 
     override fun forward() = stateOfMind[0] > 0.5
