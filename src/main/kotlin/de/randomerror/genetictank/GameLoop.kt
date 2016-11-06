@@ -115,8 +115,14 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
             fillText("fitness best: ${bestFitness}", 10.0, 60.0)
             fillText("fitness 5th best: ${bestFitness5}", 10.0, 80.0)
-            fillText("fitness median: ${medianFitness}", 10.0, 100.0)
-            fillText("fitness average: ${averageFitness}", 10.0, 120.0)
+
+            transformContext {
+                fill = Color.GREEN
+                fillText("fitness median: ${medianFitness}", 10.0, 100.0)
+
+                fill = Color.ORANGE
+                fillText("fitness average: ${averageFitness}", 10.0, 120.0)
+            }
 
             transformContext {
                 gc.translate(25.0, 250.0)
@@ -133,28 +139,46 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     }
 
     fun renderGraph(gc: GraphicsContext) = gc.transformContext {
-        val valueScale = 0.1
+        val yAxisScale = 0.05
+        val xAxisScale = 0.5
 
         transform(1.0, 0.0,
-                0.0, -1.0,
-                0.0, 0.0)
-        scale(.5, .5)
+                  0.0, -1.0,
+                  0.0, 0.0)
         lineWidth = 3.0
         beginPath()
         fitnesses.reversed().forEachIndexed { i, fitness ->
-            lineTo(i.toDouble(), fitness.fitness * valueScale)
+            lineTo(i.toDouble()*xAxisScale, fitness.fitness*yAxisScale)
         }
         stroke()
+
+        val minYVal = (fitnesses.last().fitness-10)*yAxisScale
+        val maxYVal = (fitnesses.first().fitness+10)*yAxisScale
+
+        val minXVal = 0.0
+        val maxXVal = fitnesses.size.toDouble()*xAxisScale
 
         stroke = Color.RED
         transformContext {
             lineWidth = 1.0
-            strokeLine(0.0, 0.0, fitnesses.size.toDouble(), 0.0)
+            //render x-Axis
+            strokeLine(minXVal, 0.0, maxXVal, 0.0)
 
-            scale(2.0, 2.0)
-            fillText("0", -10.0, 5.0)
+            transformContext {
+                //render median
+                fill = Color.GREEN
+                fillOval((fitnesses.size / 2) * xAxisScale, fitnesses[fitnesses.size / 2].fitness*yAxisScale - 4.0, 8.0, 8.0)
+
+                //render average
+                stroke = Color.ORANGE
+                val average = fitnesses.sumByDouble { it.fitness } / fitnesses.size
+                strokeLine(minXVal, average * yAxisScale, maxXVal, average * yAxisScale)
+            }
+
+            fillText("0", minXVal-12.0, 5.0)
         }
-        strokeLine(0.0, (fitnesses.last().fitness - 10) * valueScale, 0.0, (fitnesses.first().fitness + 10) * valueScale)
+        //render y-Axis
+        strokeLine(minXVal, minYVal, minXVal, maxYVal)
     }
 
     companion object {
