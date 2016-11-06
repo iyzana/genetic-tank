@@ -91,7 +91,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             entities += Trainer.walls
 
             entities += Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
-            entities += Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), Trainer.pokémon.first().copy())
+            entities += Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), Trainer.pokémon[4].copy())
 
             showTime = 30.0
         }
@@ -110,15 +110,16 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
         fillText("fps: ${fps.toInt()}", 10.0, 20.0)
         fillText("generation: ${Trainer.generation}", 10.0, 40.0)
-        fillText("fitness best: ${bestFitness}", 10.0, 60.0)
-        fillText("fitness median: ${medianFitness}", 10.0, 80.0)
-        fillText("fitness average: ${averageFitness}", 10.0, 100.0)
+        fillText("fitness best: ${Trainer.bestFitness}", 10.0, 60.0)
+        fillText("fitness 5th best: ${Trainer.bestFitness5}", 10.0, 60.0)
+        fillText("fitness median: ${Trainer.medianFitness}", 10.0, 80.0)
+        fillText("fitness average: ${Trainer.averageFitness}", 10.0, 100.0)
 
         transformContext {
             gc.translate(25.0, 250.0)
             renderGraph(gc)
         }
-
+        
         transformContext {
             translate(translate.x, translate.y)
             scale(scale, scale)

@@ -46,12 +46,13 @@ object Trainer {
         val fitness = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
                 .invokeAll(pokémon.map(ASI::toFitnessChecker))
                 .map(Future<PokemonFitness>::get)
+                .shuffled()
                 .sortedByDescending { it.fitness }
 
         println("best: " + fitness[0].fitness)
 
-        val surviveCount = (numPokémon * 0.6).toInt().coerceAtLeast(1)
-        val mutateCount = (numPokémon * 0.4).toInt()
+        val surviveCount = (numPokémon * 0.5).toInt().coerceAtLeast(1)
+        val mutateCount = (numPokémon * 0.5).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon.copy() }
 
