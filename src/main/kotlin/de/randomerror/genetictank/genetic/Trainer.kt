@@ -52,8 +52,7 @@ object Trainer {
         val surviveCount = (numPokémon * 0.3).toInt().coerceAtLeast(1)
         val mutateCount = (numPokémon * 0.7).toInt()
 
-        pokémon = fitness.take(surviveCount).map { it.pokemon }
-        pokémon.forEach(ASI::reset)
+        pokémon = fitness.take(surviveCount).map { it.pokemon.copy() }
 
         pokémon += (0 until mutateCount).map {
             pokémon[(Math.random() * pokémon.size).toInt()].copy().apply { mutate() }

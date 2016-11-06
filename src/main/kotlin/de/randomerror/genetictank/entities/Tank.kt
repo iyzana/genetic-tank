@@ -118,8 +118,10 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         y += velY * deltaTime
         heading += velH * deltaTime
 
-        movedDistance += Math.abs(velX * deltaTime)
-        movedDistance += Math.abs(velY * deltaTime)
+        if(player.forward() && !player.backward()) {
+            movedDistance += Math.abs(velX * deltaTime)
+            movedDistance += Math.abs(velY * deltaTime)
+        }
         
         val (tileW, tileH) = labyrinth.getTileSize()
         val tileX = ((x + width / 2) / tileW).toInt() * 2 + 1
