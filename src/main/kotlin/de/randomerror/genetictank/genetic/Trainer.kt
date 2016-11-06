@@ -10,6 +10,7 @@ import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import kotlin.concurrent.thread
 
 /**
  * Created by henri on 01.11.16.
@@ -49,7 +50,11 @@ object Trainer {
         labyrinth = LabyrinthGenerator.generate(5, 5, Random(labIndex++))
         walls = labyrinth.asWalls()
 
-        val fitness = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+        val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()) { runnable ->
+            thread(isDaemon = true, start = false) { runnable.run() }
+        }
+        
+        val fitness = threadPool
                 .invokeAll(pokémon.map(ASI::toFitnessChecker))
                 .map(Future<PokemonFitness>::get)
                 .shuffled()
