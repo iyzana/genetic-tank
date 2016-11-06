@@ -33,15 +33,11 @@ object Trainer{
     var walls = labyrinth.asWalls()
     var generation = 0
 
-    data class PokemonFitness(val pokemon: ASI, val fitness: Double) {
-        init {
-            println(fitness)
-        }
-    }
+    data class PokemonFitness(val pokemon: ASI, val fitness: Double)
 
-    fun evolve(callback:(Double) -> Unit): List<PokemonFitness> {
+    fun evolve(callback: (Double) -> Unit): List<PokemonFitness> {
         var evolved = 0
-        
+
         fun ASI.toFitnessChecker() = Callable<PokemonFitness> {
             PokemonFitness(this, train(this)).apply {
                 callback((++evolved).toDouble() / pokémon.size)
@@ -54,7 +50,7 @@ object Trainer{
         val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()) { runnable ->
             thread(isDaemon = true, start = false) { runnable.run() }
         }
-        
+
         val fitness = threadPool
                 .invokeAll(pokémon.map(ASI::toFitnessChecker))
                 .map(Future<PokemonFitness>::get)
@@ -114,16 +110,24 @@ object Trainer{
         entities += enemy
         entities += body
 
+        var distancesCount = 0
+        var enemyDistance = 0.0
+
         do {
             entities.toList().forEach { it.update(deltaTime) }
+
+            val currentDistance = Math.abs(enemy.x - body.x) + Math.abs(enemy.y - body.y)
+            enemyDistance = (currentDistance + enemyDistance * distancesCount) / ++distancesCount
+
             time += deltaTime
         } while (enemy.alive && body.alive && time < roundTime)
 
-        return when {
+        val timeScore = when {
             body.alive && !enemy.alive -> roundTime - time
             body.alive && enemy.alive -> 0.0
             else -> time - roundTime
-        } * 10 + body.visitedTiles.size * 10 + body.movedDistance / 1000
+        }
+        return timeScore * 5 + body.visitedTiles.size * 10 - enemyDistance / 50 + body.movedDistance / 1000 + body.shotBullets
     }
 
     fun ASI.mutate() {

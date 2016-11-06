@@ -38,6 +38,7 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
     var alive = true
 
     var movedDistance = 0.0
+    var shotBullets = 0
     internal val visitedTiles = mutableSetOf<Point>()
 
     val bullets = mutableListOf<Projectile>()
@@ -143,6 +144,7 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
             projectile.entities = entities
             entities.add(projectile)
             bullets += projectile
+            shotBullets++
         }
     }
 

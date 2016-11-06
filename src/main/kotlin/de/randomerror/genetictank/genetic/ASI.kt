@@ -36,12 +36,14 @@ class ASI(val layers: List<Int> = listOf(83, 83, 40, 5)) : Player, Serializable 
         idea[index++] = normalizeHeading(enemy.heading)
         idea[index++] = normalizeHeading(body.heading)
 
-        body.entities.asSequence().filter { it is Projectile }.take(10).forEachIndexed { i, entity ->
+        val projectiles = body.entities.asSequence().filter { it is Projectile }.take(10).toList()
+        projectiles.forEach { entity ->
             idea[index++] = entity.x - body.x
             idea[index++] = entity.y - body.y
             idea[index++] = entity.velX
             idea[index++] = entity.velY
         }
+        (0 until (10 - projectiles.size)).forEach { index += 4 }
 
         val (tileW, tileH) = body.labyrinth.getTileSize()
 
