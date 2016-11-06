@@ -6,6 +6,7 @@ import de.randomerror.genetictank.helper.shuffled
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import de.randomerror.genetictank.labyrinth.Point
 import javafx.scene.paint.Color
+import java.io.*
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
@@ -16,7 +17,7 @@ import kotlin.concurrent.thread
  * Created by henri on 01.11.16.
  */
 
-object Trainer {
+object Trainer{
 
     val numPokémon = 1000
     private val roundTime = 30.0
@@ -78,6 +79,21 @@ object Trainer {
 
     fun train(pokemon: ASI): Double {
         return train(pokemon, StillPlayer())
+    }
+
+    fun save() {
+        println("saving Generation")
+        val stream = ObjectOutputStream(FileOutputStream("savefile.sav"))
+        stream.writeObject(pokémon)
+        println("saving complete")
+    }
+
+    fun load() {
+        val file = File("savefile.sav")
+        if(file.exists()) {
+            val stream = ObjectInputStream(FileInputStream(file))
+            pokémon = stream.readObject() as List<ASI>
+        }
     }
 
     fun train(pokemon: ASI, against: Player): Double {

@@ -1,11 +1,12 @@
 package de.randomerror.genetictank.helper
 
+import java.io.Serializable
 import java.util.*
 
 /**
  * Created by henri on 01.11.16.
  */
-class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) {
+class Matrix(val x: Int, val y: Int, init: (i: Int, j: Int) -> Double) : Serializable {
     private val data: Array<Array<Double>> = Array(x) { i -> Array(y) { j -> init(i, j) } }
 
     operator fun get(y: Int) = data[0][y]

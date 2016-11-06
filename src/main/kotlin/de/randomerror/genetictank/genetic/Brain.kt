@@ -1,14 +1,15 @@
 package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.helper.Matrix
+import java.io.Serializable
 
 /**
  * Created by henri on 24.10.16.
  */
 
-class Brain(val layerCounts: List<Int>) {
+class Brain(val layerCounts: List<Int>) : Serializable {
 
-    private data class Layer(val bias: Matrix, val weights: Matrix)
+    private data class Layer(val bias: Matrix, val weights: Matrix) : Serializable
 
     private var theNetwork = (0 until layerCounts.size - 1).map { i ->
         Layer(Matrix.random(1, layerCounts[i + 1]), Matrix.random(layerCounts[i], layerCounts[i + 1]))

@@ -41,6 +41,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     var evolveThread: Thread? = null
 
     init {
+        Trainer.load()
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
         canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
 
@@ -90,6 +91,9 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
             GameLoop.entities.removeAll { it is Projectile }
+
+        if (keyDown(KeyCode.F5, once = true))
+            Trainer.save()
 
         if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 0) {
             entities.clear()
