@@ -143,13 +143,13 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             }
 
             transformContext {
-                gc.translate(25.0, 250.0)
+                gc.translate(25.0, pos++ * 20.0)
                 val xAxisScale = 0.5
                 val yAxisScale = 0.5
                 renderGraph(gc, xAxisScale, yAxisScale)
 
-                gc.translate(0.0, 250.0)
-                renderTimelineGraph(gc, 1000.0*xAxisScale, yAxisScale)
+                gc.translate(0.0, (fitnesses.first().fitness - fitnesses.last().fitness)*yAxisScale+40.0)
+                renderTimelineGraph(gc, fitnesses.size*xAxisScale, yAxisScale)
             }
         }
 
@@ -162,6 +162,15 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     }
 
     fun renderGraph(gc: GraphicsContext, xAxisScale: Double, yAxisScale: Double) = gc.transformContext {
+
+        val minYVal = (fitnesses.last().fitness)*yAxisScale
+        val maxYVal = (fitnesses.first().fitness)*yAxisScale
+
+        val minXVal = 0.0
+        val maxXVal = fitnesses.size.toDouble()*xAxisScale
+
+        translate(0.0, (maxYVal-minYVal)*yAxisScale)
+
         transform(1.0, 0.0,
                   0.0, -1.0,
                   0.0, 0.0)
@@ -172,11 +181,6 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         }
         stroke()
 
-        val minYVal = (fitnesses.last().fitness-10)*yAxisScale
-        val maxYVal = (fitnesses.first().fitness+10)*yAxisScale
-
-        val minXVal = 0.0
-        val maxXVal = fitnesses.size.toDouble()*xAxisScale
 
         stroke = Color.RED
         transformContext {
@@ -205,8 +209,15 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
     fun renderTimelineGraph(gc: GraphicsContext, width: Double, yAxisScale: Double) = gc.transformContext {
         //render averages Graph
+        val xAxisScale = width/Math.max(averages.size-1, 1)
 
-        val xAxisScale = width/averages.size
+        val minYVal = (averages.first()-10)*yAxisScale
+        val maxYVal = (averages.last()+10)*yAxisScale
+
+        val minXVal = 0.0
+        val maxXVal = (averages.size.toDouble()-1)*xAxisScale
+
+        translate(0.0, (maxYVal-minYVal)*yAxisScale)
 
         transform(1.0, 0.0,
                 0.0, -1.0,
@@ -220,11 +231,6 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         }
         stroke()
 
-        val minYVal = (averages.first()-10)*yAxisScale
-        val maxYVal = (averages.last()+10)*yAxisScale
-
-        val minXVal = 0.0
-        val maxXVal = averages.size.toDouble()*xAxisScale
 
         stroke = Color.RED
         transformContext {
