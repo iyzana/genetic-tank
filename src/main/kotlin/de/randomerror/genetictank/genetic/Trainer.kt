@@ -80,10 +80,12 @@ object Trainer{
 
     fun save() {
         val savedata = pokémon.map(ASI::copy)
-        Thread {
+        thread {
             log.info("saving Generation")
             val stream = ObjectOutputStream(FileOutputStream("savefile.sav"))
             stream.writeObject(savedata)
+            stream.flush()
+            stream.close()
             log.info("saving complete")
         }
     }
@@ -93,6 +95,7 @@ object Trainer{
         if(file.exists()) {
             val stream = ObjectInputStream(FileInputStream(file))
             pokémon = stream.readObject() as List<ASI>
+            stream.close()
         }
     }
 
