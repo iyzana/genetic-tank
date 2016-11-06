@@ -21,7 +21,7 @@ object Trainer {
     private val roundTime = 30.0
 
     var pokémon = (0 until numPokémon).map {
-        ASI(listOf(81, 81, 81, 40, 5))
+        ASI(listOf(82, 82, 81, 40, 5))
     }
 
     val deltaTime = 0.016
@@ -50,8 +50,8 @@ object Trainer {
 
         println("best: " + fitness[0].fitness)
 
-        val surviveCount = (numPokémon * 0.3).toInt().coerceAtLeast(1)
-        val mutateCount = (numPokémon * 0.7).toInt()
+        val surviveCount = (numPokémon * 0.6).toInt().coerceAtLeast(1)
+        val mutateCount = (numPokémon * 0.4).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon.copy() }
 

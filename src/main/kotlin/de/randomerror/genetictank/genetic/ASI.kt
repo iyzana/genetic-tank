@@ -19,18 +19,20 @@ class ASI(val layers: List<Int>) : Player {
         val enemy = body.entities.filter { it != body && it is Tank }.first() as Tank
 
         val idea = Matrix(1, layers.first(), { i, j -> 0.0 })
+        
+        var index = 0
 
-        idea[0] = time
-        idea[1] = enemy.x - body.x
-        idea[2] = enemy.y - body.y
-        idea[3] = enemy.heading
-        idea[4] = body.heading
+        idea[index++] = time
+        idea[index++] = enemy.x - body.x
+        idea[index++] = enemy.y - body.y
+        idea[index++] = enemy.heading
+        idea[index++] = body.heading
         
         body.entities.asSequence().filter { it is Projectile }.take(10).forEachIndexed { i, entity ->
-            idea[4 * i + 5] = entity.x - body.x
-            idea[4 * i + 6] = entity.y - body.y
-            idea[4 * i + 7] = entity.velX
-            idea[4 * i + 8] = entity.velY
+            idea[index++] = entity.x - body.x
+            idea[index++] = entity.y - body.y
+            idea[index++] = entity.velX
+            idea[index++] = entity.velY
         }
         
         val (tileW, tileH) = body.labyrinth.getTileSize()
@@ -44,10 +46,12 @@ class ASI(val layers: List<Int>) : Player {
             yPositions.forEachIndexed { iy, dy ->
                 directions.forEachIndexed { id, d ->
                     val pos = Point(dx, dy) + d
-                    idea[(ix * yPositions.size + iy) * 4 + id + 45] = if(!body.labyrinth.isPath(pos)) 1.0 else 0.0
+                    idea[index++] = if(!body.labyrinth.isPath(pos)) 1.0 else 0.0
                 }
             }
         }
+        
+        idea[index++] = if(body.collides) 1.0 else 0.0
         
         stateOfMind = brain.thinkAbout(idea)
         time += deltaTime

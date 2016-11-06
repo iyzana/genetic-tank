@@ -22,6 +22,7 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
 
     var entities = GameLoop.entities
     var labyrinth = GameLoop.labyrinth
+    var collides = false
 
     var game = GameLoop
 
@@ -72,6 +73,7 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         var (velX, velY, velH) = getAttemptedMove()
         val (testX, testY, testH) = getNewPosition(deltaTime)
 
+        collides = false
         val walls = entities
                 .filter { it is Wall }
                 .map { it as Wall }
@@ -82,11 +84,13 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
             walls.filter { testBoundsX.collidesWith(it.bounds.toRotatedRectangle()) }.forEach { wall ->
                 velX = 0.0
                 velY = 0.0
+                collides = true
             }
             val testBoundsY = RotatedRectangle(x, testY, width, height, heading)
             walls.filter { testBoundsY.collidesWith(it.bounds.toRotatedRectangle()) }.forEach { wall ->
                 velX = 0.0
                 velY = 0.0
+                collides = true
             }
 
             val testBoundsH = RotatedRectangle(x, y, width, height, testH)

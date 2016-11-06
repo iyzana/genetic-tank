@@ -4,7 +4,6 @@ import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
 import de.randomerror.genetictank.entities.Wall
-import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.Trainer
 import de.randomerror.genetictank.helper.render
@@ -83,12 +82,6 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
             GameLoop.entities.removeAll { it is Projectile }
-        if (keyDown(KeyCode.T, once = true)) {
-            GameLoop.entities.removeAll { it is Projectile }
-            entities -= KI
-            KI = Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), ASI(listOf(81, 81, 5)))
-            entities += KI
-        }
 
         if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 0) {
             GameLoop.entities.clear()
