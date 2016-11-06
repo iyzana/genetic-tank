@@ -9,34 +9,40 @@ import de.randomerror.genetictank.labyrinth.Point
 /**
  * Created by henri on 01.11.16.
  */
-class ASI(val layers: List<Int>) : Player {
+class ASI(val layers: List<Int> = listOf(83, 83, 40, 5)) : Player {
     var time = 0.0
     
     var brain = Brain(layers)
     var stateOfMind = Matrix(1, layers.last(), { i, j -> 0.0 })
 
     override fun update(deltaTime: Double, body: Tank) {
-        val enemy = body.entities.filter { it != body && it is Tank }.first() as Tank
+        val idea = sense(body)
 
+        stateOfMind = brain.thinkAbout(idea)
+        time += deltaTime
+    }
+
+    private fun sense(body: Tank): Matrix {
         val idea = Matrix(1, layers.first(), { i, j -> 0.0 })
-        
+
         var index = 0
+        val enemy = body.entities.filter { it != body && it is Tank }.first() as Tank
 
         idea[index++] = time
         idea[index++] = enemy.x - body.x
         idea[index++] = enemy.y - body.y
         idea[index++] = enemy.heading
         idea[index++] = body.heading
-        
+
         body.entities.asSequence().filter { it is Projectile }.take(10).forEachIndexed { i, entity ->
             idea[index++] = entity.x - body.x
             idea[index++] = entity.y - body.y
             idea[index++] = entity.velX
             idea[index++] = entity.velY
         }
-        
+
         val (tileW, tileH) = body.labyrinth.getTileSize()
-        
+
         val tileX = ((body.x + body.width / 2) / tileW).toInt() * 2 + 1
         val tileY = ((body.y + body.height / 2) / tileH).toInt() * 2 + 1
 
@@ -46,16 +52,15 @@ class ASI(val layers: List<Int>) : Player {
             yPositions.forEachIndexed { iy, dy ->
                 directions.forEachIndexed { id, d ->
                     val pos = Point(dx, dy) + d
-                    idea[index++] = if(!body.labyrinth.isPath(pos)) 1.0 else 0.0
+                    idea[index++] = if (!body.labyrinth.isPath(pos)) 1.0 else 0.0
                 }
             }
         }
+
+        idea[index++] = if (body.collidesX) 1.0 else 0.0
+        idea[index++] = if (body.collidesY) 1.0 else 0.0
         
-        idea[index++] = if(body.collidesX) 1.0 else 0.0
-        idea[index++] = if(body.collidesY) 1.0 else 0.0
-        
-        stateOfMind = brain.thinkAbout(idea)
-        time += deltaTime
+        return idea
     }
 
     override fun forward() = stateOfMind[0] > 0.5
