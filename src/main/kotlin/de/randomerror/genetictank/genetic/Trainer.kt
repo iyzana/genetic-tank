@@ -37,8 +37,14 @@ object Trainer {
         }
     }
 
-    fun evolve(): List<PokemonFitness> {
-        fun ASI.toFitnessChecker() = Callable<PokemonFitness> { PokemonFitness(this, train(this)) }
+    fun evolve(callback:(Double) -> Unit): List<PokemonFitness> {
+        var evolved = 0
+        
+        fun ASI.toFitnessChecker() = Callable<PokemonFitness> {
+            PokemonFitness(this, train(this)).apply {
+                callback((++evolved).toDouble() / pokémon.size)
+            }
+        }
 
         labyrinth = LabyrinthGenerator.generate(5, 5, Random(labIndex++))
         walls = labyrinth.asWalls()
@@ -93,7 +99,7 @@ object Trainer {
             body.alive && !enemy.alive -> roundTime - time
             body.alive && enemy.alive -> 0.0
             else -> time - roundTime
-        } * 100 + body.visitedTiles.size * 10 + body.movedDistance / 1000
+        } * 10 + body.visitedTiles.size * 10 + body.movedDistance / 1000
     }
 
     fun ASI.mutate() {

@@ -20,6 +20,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import java.util.*
+import kotlin.concurrent.thread
 
 class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     var gc = canvas.graphicsContext2D
@@ -34,6 +35,9 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
     var KI = Tank(150.0, 10.0, Color.ALICEBLUE, Trainer.pokémon.first())
     var fitnesses = listOf<Trainer.PokemonFitness>()
+    var evolvePercentage = 0.0
+
+    var evolveThread: Thread? = null
 
     init {
         canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
@@ -78,6 +82,9 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         fps = (fps * 20 + 1 / deltaTime) / 21
         previousTime = now
 
+        if (evolveThread?.isAlive ?: false)
+            return
+
         if (keyDown(KeyCode.L, once = true))
             loadLabyrinth()
         if (keyDown(KeyCode.C, once = true))
@@ -85,15 +92,22 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
         if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 0) {
             GameLoop.entities.clear()
-            fitnesses = Trainer.evolve()
 
-            labyrinth = Trainer.labyrinth
-            entities += Trainer.walls
+            evolveThread = thread(isDaemon = true, name = "evolver") {
+                evolvePercentage = 0.0
 
-            entities += Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
-            entities += Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), Trainer.pokémon[4].copy())
+                fitnesses = Trainer.evolve { percentage -> evolvePercentage = percentage }
 
-            showTime = 30.0
+                labyrinth = Trainer.labyrinth
+                entities += Trainer.walls
+
+                entities += Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
+                entities += Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), Trainer.pokémon[4].copy())
+
+                showTime = 30.0
+            }
+
+            return
         }
 
         entities.toList().forEach { it.update(0.016) }
@@ -104,8 +118,11 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     private fun render() = gc.transformContext {
         clearRect(0.0, 0.0, canvas.width, canvas.height)
 
-        fillText("fps: ${fps.toInt()}", 10.0, 20.0)
-        fillText("generation: ${Trainer.generation}", 10.0, 40.0)
+        var pos = 1
+
+        fillText("fps: ${fps.toInt()}", 10.0, pos++ * 20.0)
+        fillText("generation: ${Trainer.generation}", 10.0, pos++ * 20.0)
+        fillText("evolving: ${(evolvePercentage * 100).toInt()}%", 10.0, pos++ * 20.0)
 
         if (!fitnesses.isEmpty()) {
             val bestFitness = fitnesses.first().fitness
@@ -113,15 +130,15 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
             val averageFitness = fitnesses.sumByDouble { it.fitness } / fitnesses.size
             val medianFitness = fitnesses[fitnesses.size / 2].fitness
 
-            fillText("fitness best: ${bestFitness}", 10.0, 60.0)
-            fillText("fitness 5th best: ${bestFitness5}", 10.0, 80.0)
+            fillText("fitness best: ${bestFitness}", 10.0, pos++ * 20.0)
+            fillText("fitness 5th best: ${bestFitness5}", 10.0, pos++ * 20.0
 
             transformContext {
                 fill = Color.GREEN
-                fillText("fitness median: ${medianFitness}", 10.0, 100.0)
+                fillText("fitness median: ${medianFitness}", 10.0, pos++ * 20.0)
 
                 fill = Color.ORANGE
-                fillText("fitness average: ${averageFitness}", 10.0, 120.0)
+                fillText("fitness average: ${averageFitness}", 10.0, pos++ * 20.0)
             }
 
             transformContext {
