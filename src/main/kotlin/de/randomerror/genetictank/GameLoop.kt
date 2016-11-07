@@ -8,6 +8,7 @@ import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.Trainer
 import de.randomerror.genetictank.helper.log
+import de.randomerror.genetictank.helper.Graph
 import de.randomerror.genetictank.helper.render
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
@@ -40,6 +41,9 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     var evolvePercentage = 0.0
 
     var evolveThread: Thread? = null
+
+    var fitnessGraph: Graph? = null
+    var averagesGraph: Graph? = null
 
     init {
         log.info("running with ${Runtime.getRuntime().availableProcessors().coerceAtMost(32)} threads")
@@ -113,6 +117,20 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 val averageFitness = averages.last()
                 val medianFitness = fitnesses[fitnesses.size / 2].fitness
 
+                val fitnessesReversed = fitnesses.reversed()
+
+                fitnessGraph = Graph(
+                        0.5, 10, "fitness",
+                        2.0, 5, "sorted tanks",
+                        mapOf(Color.BLUE to (0 until fitnessesReversed.size).associateBy({ it.toDouble() }, { fitnessesReversed[it].fitness }))
+                )
+
+                averagesGraph = Graph(
+                        0.5, 5, "average fitness",
+                        0.5, 10, "generation",
+                        mapOf(Color.ORANGE to (0 until averages.size).associateBy({ it.toDouble() }, { averages[it] }))
+                )
+
                 log.info("generation: ${Trainer.generation}, best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
 
                 labyrinth = Trainer.labyrinth
@@ -131,6 +149,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
         showTime -= 0.016
     }
+
 
     private fun render() = gc.transformContext {
         try {
@@ -168,13 +187,17 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 }
 
                 transformContext {
-                    gc.translate(25.0, pos++ * 20.0)
-                    val xAxisScale = 0.5
-                    val yAxisScale = 0.5
-                    renderGraph(gc, xAxisScale, yAxisScale)
+                    translate(50.0, pos++ * 20.0)
 
-                    gc.translate(0.0, (fitnesses.first().fitness - fitnesses.last().fitness) * yAxisScale + 40.0)
-                    renderTimelineGraph(gc, fitnesses.size * xAxisScale, yAxisScale)
+                    fitnessGraph?.render(gc)
+                    fitnessGraph?.renderPoint(gc, fitnesses.size.toDouble() / 2.0, medianFitness, 4.0, Color.GREEN)
+                    fitnessGraph?.renderPoint(gc, fitnesses.size.toDouble() - 5, bestFitness5, 4.0, Color.PURPLE)
+
+                    val height = fitnessGraph?.height?: 0.0
+
+                    translate(0.0, height + 20.0)
+
+                    averagesGraph?.render(gc)
                 }
             }
 
@@ -217,92 +240,6 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         } catch(e: Exception) {
             log.error("exception while rendering scene", e)
         }
-    }
-
-    fun renderGraph(gc: GraphicsContext, xAxisScale: Double, yAxisScale: Double) = gc.transformContext {
-
-        val minYVal = (fitnesses.last().fitness) * yAxisScale
-        val maxYVal = (fitnesses.first().fitness) * yAxisScale
-
-        val minXVal = 0.0
-        val maxXVal = fitnesses.size.toDouble() * xAxisScale
-
-        translate(0.0, (maxYVal - minYVal) * yAxisScale)
-
-        transform(1.0, 0.0,
-                0.0, -1.0,
-                0.0, 0.0)
-        lineWidth = 3.0
-        beginPath()
-        fitnesses.reversed().forEachIndexed { i, fitness ->
-            lineTo(i.toDouble() * xAxisScale, fitness.fitness * yAxisScale)
-        }
-        stroke()
-
-
-        stroke = Color.RED
-        transformContext {
-            lineWidth = 1.0
-            //render x-Axis
-            strokeLine(minXVal, 0.0, maxXVal, 0.0)
-
-            transformContext {
-                //render median
-                fill = Color.GREEN
-                fillOval((fitnesses.size / 2) * xAxisScale - 4.0, fitnesses[fitnesses.size / 2].fitness * yAxisScale - 4.0, 8.0, 8.0)
-
-                fill = Color.PURPLE
-                fillOval((fitnesses.size - 5) * xAxisScale - 4.0, fitnesses[4].fitness * yAxisScale - 4.0, 8.0, 8.0)
-
-                //render average
-                stroke = Color.ORANGE
-                val average = averages.last()
-                strokeLine(minXVal, average * yAxisScale, maxXVal, average * yAxisScale)
-            }
-
-            fillText("0", minXVal - 12.0, 5.0)
-        }
-        //render y-Axis
-        strokeLine(minXVal, minYVal, minXVal, maxYVal)
-
-
-    }
-
-    fun renderTimelineGraph(gc: GraphicsContext, width: Double, yAxisScale: Double) = gc.transformContext {
-        //render averages Graph
-        val xAxisScale = width / Math.max(averages.size - 1, 1)
-
-        val minYVal = (averages.first() - 10) * yAxisScale
-        val maxYVal = (averages.last() + 10) * yAxisScale
-
-        val minXVal = 0.0
-        val maxXVal = (averages.size.toDouble() - 1) * xAxisScale
-
-        translate(0.0, (maxYVal - minYVal) * yAxisScale)
-
-        transform(1.0, 0.0,
-                0.0, -1.0,
-                0.0, 0.0)
-
-        lineWidth = 3.0
-        stroke = Color.ORANGE
-        beginPath()
-        averages.forEachIndexed { i, average ->
-            lineTo(i.toDouble() * xAxisScale, average * yAxisScale)
-        }
-        stroke()
-
-
-        stroke = Color.RED
-        transformContext {
-            lineWidth = 1.0
-            //render x-Axis
-            strokeLine(minXVal, 0.0, maxXVal, 0.0)
-
-            fillText("0", minXVal - 12.0, 5.0)
-        }
-        //render y-Axis
-        strokeLine(minXVal, minYVal, minXVal, maxYVal)
     }
 
     companion object {
