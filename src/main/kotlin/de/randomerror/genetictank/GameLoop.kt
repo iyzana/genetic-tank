@@ -122,14 +122,19 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 fitnessGraph = Graph(
                         0.5, 10, "fitness",
                         2.0, 5, "sorted tanks",
-                        mapOf(Color.BLUE to (0 until fitnessesReversed.size).associateBy({ it.toDouble() }, { fitnessesReversed[it].fitness }))
+                        mapOf(Color.BLUE to (0 until fitnessesReversed.size).associateBy({ it.toDouble() }, { fitnessesReversed[it].fitness }),
+                                Color.ORANGE to mapOf(0.0 to averageFitness, fitnessesReversed.size.toDouble() to averageFitness))
                 )
 
-                averagesGraph = Graph(
-                        0.5, 5, "average fitness",
-                        0.5, 10, "generation",
-                        mapOf(Color.ORANGE to (0 until averages.size).associateBy({ it.toDouble() }, { averages[it] }))
-                )
+                if (averages.size > 1) {
+                    val xScale = (fitnessGraph?.width ?: 0.0) / (averages.size-1)
+                    log.info("xScale: $xScale")
+                    averagesGraph = Graph(
+                            xScale, 5, "average fitness",
+                            2.0, 10, "generation",
+                            mapOf(Color.ORANGE to (0 until averages.size).associateBy({ it.toDouble() }, { averages[it] }))
+                    )
+                }
 
                 log.info("generation: ${Trainer.generation}, best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
 
@@ -193,9 +198,9 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                     fitnessGraph?.renderPoint(gc, fitnesses.size.toDouble() / 2.0, medianFitness, 4.0, Color.GREEN)
                     fitnessGraph?.renderPoint(gc, fitnesses.size.toDouble() - 5, bestFitness5, 4.0, Color.PURPLE)
 
-                    val height = fitnessGraph?.height?: 0.0
+                    val height = fitnessGraph?.height ?: 0.0
 
-                    translate(0.0, height + 20.0)
+                    translate(0.0, height + 30.0)
 
                     averagesGraph?.render(gc)
                 }
