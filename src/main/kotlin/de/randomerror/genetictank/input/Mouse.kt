@@ -10,7 +10,7 @@ import java.util.*
 /**
  * Created by Jannis on 19.10.16.
  */
-object Mouse : EventHandler<MouseEvent> {
+object Mouse {
     private enum class ButtonState {
         UP,
         RELEASED,
@@ -53,7 +53,7 @@ object Mouse : EventHandler<MouseEvent> {
 
     fun getY() = currentPosition.y
 
-    override fun handle(event: MouseEvent) {
+    fun handle(event: MouseEvent) {
         when (event.eventType) {
             MouseEvent.MOUSE_PRESSED -> actualState[event.button] = true
             MouseEvent.MOUSE_RELEASED -> actualState[event.button] = false

@@ -7,35 +7,28 @@ import de.randomerror.genetictank.entities.Wall
 import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.Trainer
-import de.randomerror.genetictank.helper.log
-import de.randomerror.genetictank.helper.Graph
-import de.randomerror.genetictank.helper.render
-import de.randomerror.genetictank.helper.transformContext
+import de.randomerror.genetictank.helper.*
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Keyboard.keyDown
 import de.randomerror.genetictank.input.Mouse
 import de.randomerror.genetictank.labyrinth.Labyrinth
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
-import javafx.animation.AnimationTimer
-import javafx.geometry.Point2D
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import java.util.*
 import kotlin.concurrent.thread
 
-class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
-    var gc: GraphicsContext = canvas.graphicsContext2D
+class GameLoop(val canvas: Canvas? = null) {
+    val gc: GraphicsContext? = canvas?.graphicsContext2D
     var previousTime = System.nanoTime()
 
-
-    var translate: Point2D = Point2D(0.0, 0.0)
+    var translate: Vector2D = Vector2D(0.0, 0.0)
     var scale: Double = 1.0
     var fps = 0.0
     var showTime = 30.0
 
-    var KI = Tank(150.0, 10.0, Color.ALICEBLUE, Trainer.pokémon.first())
+    var KI = Tank(150.0, 10.0, Trainer.pokémon.first())
     var fitnesses = listOf<Trainer.PokemonFitness>()
     val averages = mutableListOf<Double>()
     var evolvePercentage = 0.0
@@ -49,10 +42,10 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         log.info("running with ${Runtime.getRuntime().availableProcessors().coerceAtMost(32)} threads")
 
         Trainer.load()
-        canvas.widthProperty().addListener { observable, oldValue, newValue -> calculateScale() }
-        canvas.heightProperty().addListener { observable, oldValue, newValue -> calculateScale() }
+        canvas?.widthProperty()?.addListener { observable, oldValue, newValue -> calculateScale() }
+        canvas?.heightProperty()?.addListener { observable, oldValue, newValue -> calculateScale() }
 
-        entities += Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
+        entities += Tank(400.0, 400.0, StillPlayer())
         entities += KI
 
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
@@ -69,14 +62,14 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         calculateScale()
     }
 
-    private fun calculateScale() {
+    private fun calculateScale() = gc?.let { gc ->
         val (labW, labH) = labyrinth.getRealSize()
 
         scale = Math.min(gc.canvas.width / labW, gc.canvas.height / labH) * 0.8
-        translate = Point2D((gc.canvas.width - labW * scale) / 2, (gc.canvas.height - labH * scale) / 2)
+        translate = Vector2D((gc.canvas.width - labW * scale) / 2, (gc.canvas.height - labH * scale) / 2)
     }
 
-    override fun handle(now: Long) {
+    fun handle(now: Long) {
         update(now)
         render()
     }
@@ -91,18 +84,18 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         fps = (fps * 20 + 1 / deltaTime) / 21
         previousTime = now
 
+        if (keyDown("l", once = true))
+            loadLabyrinth()
+        if (keyDown("c", once = true))
+            entities.removeAll { it is Projectile }
+
+        if (keyDown("f5", once = true) || (Trainer.generation % saveInterval == 0 && Trainer.generation != 0))
+            Trainer.save()
+
         if (evolveThread?.isAlive ?: false)
             return
 
-        if (keyDown(KeyCode.L, once = true))
-            loadLabyrinth()
-        if (keyDown(KeyCode.C, once = true))
-            GameLoop.entities.removeAll { it is Projectile }
-
-        if (keyDown(KeyCode.F5, once = true) || Trainer.generation % 100 == 0)
-            Trainer.save()
-
-        if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown(KeyCode.G, once = true) || showTime <= 40) {
+        if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown("g", once = true) || showTime <= 40) {
             entities.clear()
 
             evolveThread = thread(isDaemon = true, name = "evolver") {
@@ -119,21 +112,24 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
 
                 val fitnessesReversed = fitnesses.reversed()
 
-                fitnessGraph = Graph(
-                        0.5, 10, "fitness",
-                        2.0, 5, "sorted tanks",
-                        mapOf(Color.BLUE to (0 until fitnessesReversed.size).associateBy({ it.toDouble() }, { fitnessesReversed[it].fitness }),
-                                Color.ORANGE to mapOf(0.0 to averageFitness, fitnessesReversed.size.toDouble() to averageFitness))
-                )
+                fitnessGraph = canvas?.let {
+                    Graph(
+                            0.5, 10, "fitness",
+                            2.0, 5, "sorted tanks",
+                            mapOf(Color.BLUE to (0 until fitnessesReversed.size).associateBy(Int::toDouble, { fitnessesReversed[it].fitness }),
+                                    Color.ORANGE to mapOf(0.0 to averageFitness, fitnessesReversed.size.toDouble() to averageFitness))
+                    )
+                }
 
                 if (averages.size > 1) {
-                    val xScale = (fitnessGraph?.width ?: 0.0) / (averages.size-1)
-                    log.info("xScale: $xScale")
-                    averagesGraph = Graph(
-                            xScale, 5, "average fitness",
-                            2.0, 10, "generation",
-                            mapOf(Color.ORANGE to (0 until averages.size).associateBy({ it.toDouble() }, { averages[it] }))
-                    )
+                    val xScale = (fitnessGraph?.width ?: 0.0) / (averages.size - 1)
+                    averagesGraph = canvas?.let {
+                        Graph(
+                                xScale, 5, "average fitness",
+                                2.0, 10, "generation",
+                                mapOf(Color.ORANGE to (0 until averages.size).associateBy(Int::toDouble, { averages[it] }))
+                        )
+                    }
                 }
 
                 log.info("generation: ${Trainer.generation}, best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
@@ -141,8 +137,8 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 labyrinth = Trainer.labyrinth
                 entities += Trainer.walls
 
-                entities += Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
-                entities += Tank(150.0, 10.0, Color.color(Math.random(), Math.random(), Math.random()), Trainer.pokémon[4].copy())
+                entities += Tank(400.0, 400.0, StillPlayer())
+                entities += Tank(150.0, 10.0, Trainer.pokémon[4].copy())
 
                 showTime = 30.0
             }
@@ -155,8 +151,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
         showTime -= 0.016
     }
 
-
-    private fun render() = gc.transformContext {
+    private fun render() = gc?.transformContext {
         try {
             clearRect(0.0, 0.0, canvas.width, canvas.height)
 
@@ -194,15 +189,15 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
                 transformContext {
                     translate(50.0, pos++ * 20.0)
 
-                    fitnessGraph?.render(gc)
-                    fitnessGraph?.renderPoint(gc, fitnesses.size.toDouble() / 2.0, medianFitness, 4.0, Color.GREEN)
-                    fitnessGraph?.renderPoint(gc, fitnesses.size.toDouble() - 5, bestFitness5, 4.0, Color.PURPLE)
+                    fitnessGraph?.render(this)
+                    fitnessGraph?.renderPoint(this, fitnesses.size.toDouble() / 2.0, medianFitness, 4.0, Color.GREEN)
+                    fitnessGraph?.renderPoint(this, fitnesses.size.toDouble() - 5, bestFitness5, 4.0, Color.PURPLE)
 
                     val height = fitnessGraph?.height ?: 0.0
 
                     translate(0.0, height + 30.0)
 
-                    averagesGraph?.render(gc)
+                    averagesGraph?.render(this)
                 }
             }
 
@@ -248,6 +243,7 @@ class GameLoop(canvas: Canvas, default: Boolean = false) : AnimationTimer() {
     }
 
     companion object {
+        var saveInterval = 100
         val entities = mutableListOf<Entity>()
 
         var level = 1L

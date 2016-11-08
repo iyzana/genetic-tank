@@ -3,8 +3,8 @@ package de.randomerror.genetictank
 import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Mouse
+import javafx.animation.AnimationTimer
 import javafx.application.Application
-import javafx.application.Application.launch
 import javafx.scene.Group
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
@@ -29,30 +29,42 @@ class App : Application() {
             val group = Group()
             group.children += canvas
             scene = Scene(group)
-            
+
             scene.widthProperty().addListener { observable, oldValue, newValue -> canvas.width = newValue.toDouble() }
             scene.heightProperty().addListener { observable, oldValue, newValue -> canvas.height = newValue.toDouble() }
-            
+
             addInputListeners(scene)
         }
-        
-        GameLoop(canvas).start()
+
+        val gameLoop = GameLoop(canvas)
+
+        object : AnimationTimer() {
+            override fun handle(now: Long) = gameLoop.handle(now)
+        }.start()
 
         stage.show()
     }
 
     private fun addInputListeners(scene: Scene) {
-        scene.onMouseMoved = Mouse
-        scene.onMouseDragged = Mouse
-        scene.onMousePressed = Mouse
-        scene.onMouseReleased = Mouse
-        scene.onKeyPressed = Keyboard
-        scene.onKeyReleased = Keyboard
+        scene.setOnMouseMoved { Mouse.handle(it) }
+        scene.setOnMouseDragged { Mouse.handle(it) }
+        scene.setOnMousePressed { Mouse.handle(it) }
+        scene.setOnMouseReleased { Mouse.handle(it) }
+        scene.setOnKeyPressed { Keyboard.handle(it) }
+        scene.setOnKeyReleased { Keyboard.handle(it) }
     }
 }
 
 fun main(args: Array<String>) {
+    if (args.isNotEmpty())
+        GameLoop.saveInterval = args[0].toInt().coerceAtLeast(1)
+
     log.info("Application start")
 
-    launch(App::class.java)
+//    launch(App::class.java)
+
+    val gameLoop = GameLoop()
+    while (true) {
+        gameLoop.handle(System.nanoTime())
+    }
 }

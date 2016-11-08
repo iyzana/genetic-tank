@@ -4,7 +4,6 @@ import de.randomerror.genetictank.GameLoop
 import de.randomerror.genetictank.helper.transformContext
 import de.randomerror.genetictank.input.Keyboard
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 
 /**
@@ -13,7 +12,6 @@ import javafx.scene.paint.Color
 class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     var entities = GameLoop.entities
 
-    val color = Color(.0, .0, .0, 1.0)
     val radius = 3.0
 
     var alive = true
@@ -30,7 +28,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     override fun render(gc: GraphicsContext) = gc.transformContext {
         if (!alive) return@transformContext
 
-        fill = color
+        fill = Color.BLACK
 
         fillOval(x, y, radius * 2, radius * 2)
     }
@@ -38,7 +36,7 @@ class Projectile(x: Double, y: Double, heading: Double) : Entity() {
     override fun update(deltaTime: Double) {
         if (!alive) return
 
-        if (Keyboard.keyDown(KeyCode.C))
+        if (Keyboard.keyDown("c"))
             alive = false
 
         val curX = x

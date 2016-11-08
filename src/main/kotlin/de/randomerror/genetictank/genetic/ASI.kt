@@ -10,7 +10,7 @@ import java.io.Serializable
 /**
  * Created by henri on 01.11.16.
  */
-class ASI(val layers: List<Int> = listOf(83, 83, 83, 40, 5)) : Player, Serializable {
+class ASI(val layers: List<Int> = listOf(83, 83, 40, 5)) : Player, Serializable {
     var time = 0.0
     
     lateinit var idea: Matrix
@@ -50,8 +50,8 @@ class ASI(val layers: List<Int> = listOf(83, 83, 83, 40, 5)) : Player, Serializa
         val tileX = ((body.x + body.width / 2) / tileW).toInt() * 2 + 1
         val tileY = ((body.y + body.height / 2) / tileH).toInt() * 2 + 1
 
-        val xPositions = (tileX - 2 until tileX + 2 step 2).toList()
-        val yPositions = (tileY - 2 until tileY + 2 step 2).toList()
+        val xPositions = ((tileX - 2)..(tileX + 2) step 2).toList()
+        val yPositions = ((tileY - 2)..(tileY + 2) step 2).toList()
         xPositions.forEachIndexed { ix, dx ->
             yPositions.forEachIndexed { iy, dy ->
                 directions.forEachIndexed { id, d ->

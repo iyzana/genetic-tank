@@ -13,7 +13,7 @@ import javafx.scene.paint.Color
 /**
  * Created by henri on 19.10.16.
  */
-class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : Entity() {
+class Tank(xPos: Double, yPos: Double, val player: Player) : Entity() {
 
     init {
         this.x = xPos
@@ -43,8 +43,13 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
 
     val bullets = mutableListOf<Projectile>()
 
+    var color: Color? = null
+
     override fun render(gc: GraphicsContext) = gc.transformContext {
         if (!alive) return@transformContext
+
+        if (color == null)
+            color = Color.color(Math.random(), Math.random(), Math.random())
 
         val outline = getBounds().outline
         gc.strokeRect(outline.x, outline.y, outline.width, outline.height)
@@ -59,7 +64,7 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         fillRect(0.0, 0.0, width, height)
         strokeRect(0.0, 0.0, width, height)
 
-        fill = color.brighter()
+        fill = color?.brighter()
         fillRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
         strokeRect(0.4 * width, -0.2 * width, 0.2 * width, 0.8 * width)
 
@@ -100,7 +105,7 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
             walls.filter { testBoundsH.collidesWith(it.bounds.toRotatedRectangle()) }.forEach { wall ->
                 val collision = testBoundsH.collisionArea(wall.bounds)
 
-                if(collision.area.isEmpty) return@forEach
+                if (collision.area.isEmpty) return@forEach
 
                 val midX = collision.x + collision.width / 2
                 val midY = collision.y + collision.height / 2
@@ -125,16 +130,16 @@ class Tank(xPos: Double, yPos: Double, val color: Color, val player: Player) : E
         y += velY * deltaTime
         heading += velH * deltaTime
 
-        if(player.forward() && !player.backward()) {
+        if (player.forward() && !player.backward()) {
             movedDistance += Math.abs(velX * deltaTime)
             movedDistance += Math.abs(velY * deltaTime)
         }
-        
+
         val (tileW, tileH) = labyrinth.getTileSize()
         val tileX = ((x + width / 2) / tileW).toInt() * 2 + 1
         val tileY = ((y + height / 2) / tileH).toInt() * 2 + 1
         visitedTiles += Point(tileX, tileY)
-        
+
         bullets.removeAll { !it.alive }
 
         if (player.shoot() && bullets.size < 5) {

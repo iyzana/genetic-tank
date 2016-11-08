@@ -6,7 +6,6 @@ import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.helper.shuffled
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import de.randomerror.genetictank.labyrinth.Point
-import javafx.scene.paint.Color
 import java.io.*
 import java.util.*
 import java.util.concurrent.Callable
@@ -57,8 +56,8 @@ object Trainer {
                 .shuffled()
                 .sortedByDescending { it.fitness }
 
-        val surviveCount = (numPokémon * 0.5).toInt().coerceAtLeast(1)
-        val mutateCount = (numPokémon * 0.5).toInt()
+        val surviveCount = (numPokémon * 0.75).toInt().coerceAtLeast(1)
+        val mutateCount = (numPokémon * 0.25).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon.copy() }
 
@@ -77,10 +76,13 @@ object Trainer {
 
     fun save() {
         val saveFile = File("savefile-$generation.sav")
-        
+        if (saveFile.exists()) return
+        if (!saveFile.createNewFile())
+            throw IOException("can't create file " + saveFile.canonicalPath)
+
         log.info("preparing save")
         val saveData = pokémon.map(ASI::copy)
-        
+
         thread(name = "saver", isDaemon = true) {
             log.info("saving generation $generation")
             ObjectOutputStream(FileOutputStream(saveFile)).use { stream ->
@@ -105,8 +107,8 @@ object Trainer {
     fun train(pokemon: ASI, against: Player): Double {
         val entities: MutableList<Entity> = walls.toMutableList()
 
-        val enemy = Tank(400.0, 400.0, Color.SADDLEBROWN, StillPlayer())
-        val body = Tank(150.0, 10.0, Color.ALICEBLUE, pokemon)
+        val enemy = Tank(400.0, 400.0, StillPlayer())
+        val body = Tank(150.0, 10.0, pokemon)
         var time = 0.0
 
         enemy.entities = entities
@@ -134,19 +136,19 @@ object Trainer {
             body.alive && enemy.alive -> 0.0
             else -> time - roundTime
         }
-        return timeScore * 5 + body.visitedTiles.size * 10 - enemyDistance / 50 + body.movedDistance / 1000 + body.shotBullets
+        return timeScore + body.visitedTiles.size * 10 - enemyDistance / 50 + body.movedDistance / 1000 + body.shotBullets
     }
 
     fun ASI.mutate() {
         val brainMass = brain.allAxons
                 .flatMap { axon -> Array(axon.x) { i -> Array(axon.y) { j -> axon to Point(i, j) }.toList() }.flatMap { it }.toList() }
                 .shuffled()
-        brainMass.take(brainMass.size * 10 / 100)
+        brainMass.take(brainMass.size * 4 / 100)
                 .forEach { pair ->
                     val (axon, position) = pair
 
                     val ohm = axon[position.x, position.y]
-                    axon[position.x, position.y] = ohm + (Math.random() * 20 - 10) + (ohm * (Math.random() * 20 - 10) / 100)
+                    axon[position.x, position.y] = ohm + (Math.random() * 1 - 0.5) + (ohm * (Math.random() * 10 - 5) / 100)
                 }
     }
 }
