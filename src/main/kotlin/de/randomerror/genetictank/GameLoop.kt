@@ -11,7 +11,6 @@ import de.randomerror.genetictank.helper.*
 import de.randomerror.genetictank.input.Keyboard
 import de.randomerror.genetictank.input.Keyboard.keyDown
 import de.randomerror.genetictank.input.Mouse
-import de.randomerror.genetictank.labyrinth.Labyrinth
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
@@ -45,19 +44,11 @@ class GameLoop(val canvas: Canvas? = null) {
         canvas?.widthProperty()?.addListener { observable, oldValue, newValue -> calculateScale() }
         canvas?.heightProperty()?.addListener { observable, oldValue, newValue -> calculateScale() }
 
-        entities += Tank(400.0, 400.0, StillPlayer())
+        entities += Tank(900.0, 900.0, StillPlayer())
         entities += KI
 
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
 
-        entities += labyrinth.asWalls()
-        calculateScale()
-    }
-
-    private fun loadLabyrinth() {
-        entities.removeAll { it is Wall }
-
-        labyrinth = LabyrinthGenerator.generate(5, 5, Random(1))
         entities += labyrinth.asWalls()
         calculateScale()
     }
@@ -84,8 +75,6 @@ class GameLoop(val canvas: Canvas? = null) {
         fps = (fps * 20 + 1 / deltaTime) / 21
         previousTime = now
 
-        if (keyDown("l", once = true))
-            loadLabyrinth()
         if (keyDown("c", once = true))
             entities.removeAll { it is Projectile }
 
@@ -137,7 +126,7 @@ class GameLoop(val canvas: Canvas? = null) {
                 labyrinth = Trainer.trainingLabyrinths[0]
                 entities += Trainer.trainingLabyrinths[0].asWalls()
 
-                entities += Tank(400.0, 400.0, StillPlayer())
+                entities += Tank(900.0, 900.0, StillPlayer())
                 entities += Tank(150.0, 10.0, Trainer.pokémon[4].copy())
 
                 showTime = 30.0
@@ -246,7 +235,6 @@ class GameLoop(val canvas: Canvas? = null) {
         var saveInterval = 100
         val entities = mutableListOf<Entity>()
 
-        var level = 1L
-        var labyrinth: Labyrinth = LabyrinthGenerator.generate(5, 5, Random(1))
+        var labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
     }
 }

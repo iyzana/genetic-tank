@@ -45,6 +45,9 @@ object Trainer {
             }
         }
 
+//        labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
+//        walls = labyrinth.asWalls()
+
         val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()) { runnable ->
             thread(isDaemon = true, start = false) { runnable.run() }
         }

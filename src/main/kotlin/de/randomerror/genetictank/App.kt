@@ -61,7 +61,7 @@ fun main(args: Array<String>) {
 
     log.info("Application start")
 
-//    launch(App::class.java)
+//    Application.launch(App::class.java)
 
     val gameLoop = GameLoop()
     while (true) {
