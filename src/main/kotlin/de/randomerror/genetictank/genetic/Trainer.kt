@@ -2,8 +2,10 @@ package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Tank
+import de.randomerror.genetictank.helper.averageBy
 import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.helper.shuffled
+import de.randomerror.genetictank.labyrinth.Labyrinth
 import de.randomerror.genetictank.labyrinth.LabyrinthGenerator
 import de.randomerror.genetictank.labyrinth.Point
 import java.io.*
@@ -27,9 +29,9 @@ object Trainer {
 
     val deltaTime = 0.016
 
-    private var labIndex = 1L
-    var labyrinth = LabyrinthGenerator.generate(5, 5, Random(0))
-    var walls = labyrinth.asWalls()
+    val labSeed = 625430789L
+    val trainingLabyrinths = (0 until 5).map { LabyrinthGenerator.generate(5, 5, Random(labSeed+it)) }
+
     var generation = 0
 
     data class PokemonFitness(val pokemon: ASI, val fitness: Double)
@@ -38,13 +40,10 @@ object Trainer {
         var evolved = 0
 
         fun ASI.toFitnessChecker() = Callable<PokemonFitness> {
-            PokemonFitness(this, train(this)).apply {
+            PokemonFitness(this, trainingLabyrinths.averageBy { train(this, it) }).apply {
                 callback((++evolved).toDouble() / pokémon.size)
             }
         }
-
-        labyrinth = LabyrinthGenerator.generate(5, 5, Random(labIndex++))
-        walls = labyrinth.asWalls()
 
         val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()) { runnable ->
             thread(isDaemon = true, start = false) { runnable.run() }
@@ -68,10 +67,6 @@ object Trainer {
         generation++
 
         return fitness
-    }
-
-    fun train(pokemon: ASI): Double {
-        return train(pokemon, StillPlayer())
     }
 
     fun save() {
@@ -104,17 +99,21 @@ object Trainer {
         }
     }
 
-    fun train(pokemon: ASI, against: Player): Double {
-        val entities: MutableList<Entity> = walls.toMutableList()
+    fun train(pokemon: ASI, on: Labyrinth): Double {
+        return train(pokemon, StillPlayer(), on)
+    }
 
-        val enemy = Tank(400.0, 400.0, StillPlayer())
+    fun train(pokemon: ASI, against: Player, on: Labyrinth): Double {
+        val entities: MutableList<Entity> = on.asWalls().toMutableList()
+
+        val enemy = Tank(400.0, 400.0, against)
         val body = Tank(150.0, 10.0, pokemon)
         var time = 0.0
 
         enemy.entities = entities
-        enemy.labyrinth = labyrinth
+        enemy.labyrinth = on
         body.entities = entities
-        body.labyrinth = labyrinth
+        body.labyrinth = on
 
         entities += enemy
         entities += body
