@@ -134,8 +134,8 @@ class GameLoop(val canvas: Canvas? = null) {
 
                 log.info("generation: ${Trainer.generation}, best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
 
-                labyrinth = Trainer.labyrinth
-                entities += Trainer.walls
+                labyrinth = Trainer.trainingLabyrinths[0]
+                entities += Trainer.trainingLabyrinths[0].asWalls()
 
                 entities += Tank(400.0, 400.0, StillPlayer())
                 entities += Tank(150.0, 10.0, Trainer.pokémon[4].copy())
