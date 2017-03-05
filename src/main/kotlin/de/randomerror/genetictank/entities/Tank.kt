@@ -39,7 +39,8 @@ class Tank(xPos: Double, yPos: Double, val player: Player) : Entity() {
 
     var movedDistance = 0.0
     var shotBullets = 0
-    internal val visitedTiles = mutableSetOf<Point>()
+    var blockedTicks = 0
+    val visitedTiles = mutableSetOf<Point>()
 
     val bullets = mutableListOf<Projectile>()
 
@@ -133,6 +134,10 @@ class Tank(xPos: Double, yPos: Double, val player: Player) : Entity() {
         if (player.forward() && !player.backward()) {
             movedDistance += Math.abs(velX * deltaTime)
             movedDistance += Math.abs(velY * deltaTime)
+        }
+
+        if ((player.forward() xor player.backward()) && (collidesX || collidesY)) {
+            blockedTicks++
         }
 
         val (tileW, tileH) = labyrinth.getTileSize()

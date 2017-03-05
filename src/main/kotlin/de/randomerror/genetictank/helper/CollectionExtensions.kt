@@ -14,10 +14,4 @@ operator fun <T> Collection<T>.get(range: IntRange) = this.filterIndexed { index
 
 fun <T> List<T>.shuffled(random: Random = Random()) = apply { Collections.shuffle(this, random) }
 
-fun <T> List<T>.averageBy(selector: (T)-> Double): Double {
-    var sum: Double = 0.0
-    for(element in this) {
-        sum += selector(element)
-    }
-    return sum / this.size
-}
+fun <T> List<T>.averageBy(selector: (T)-> Double) = sumByDouble(selector) / size

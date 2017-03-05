@@ -2,7 +2,6 @@ package de.randomerror.genetictank.genetic
 
 import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Tank
-import de.randomerror.genetictank.helper.averageBy
 import de.randomerror.genetictank.helper.log
 import de.randomerror.genetictank.helper.shuffled
 import de.randomerror.genetictank.labyrinth.Labyrinth
@@ -29,8 +28,12 @@ object Trainer {
 
     val deltaTime = 0.016
 
-    val labSeed = 625430789L
-    val trainingLabyrinths = (0 until 5).map { LabyrinthGenerator.generate(5, 5, Random(labSeed+it)) }
+    var labSeed = 0L
+    var trainingLabyrinths = Array(3) { LabyrinthGenerator.generate(5, 5, Random(labSeed++)) }
+
+    val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()) { runnable ->
+        thread(isDaemon = true, start = false) { runnable.run() }
+    }
 
     var generation = 0
 
@@ -39,18 +42,23 @@ object Trainer {
     fun evolve(callback: (Double) -> Unit): List<PokemonFitness> {
         var evolved = 0
 
+        val newLabyrinths = generation % 40 == 0 && generation != 0
+        if (newLabyrinths)
+            trainingLabyrinths = Array(3) { LabyrinthGenerator.generate(5, 5, Random(labSeed++)) }
+
         fun ASI.toFitnessChecker() = Callable<PokemonFitness> {
-            PokemonFitness(this, trainingLabyrinths.averageBy { train(this, it) }).apply {
-                callback((++evolved).toDouble() / pokémon.size)
+            fitness = when {
+                !newLabyrinths && copyCount != 0 -> fitness
+                else -> trainingLabyrinths.map { train(pokemon = this, on = it) }.min() ?: -1000.0
             }
+
+            callback((++evolved).toDouble() / pokémon.size)
+
+            PokemonFitness(this, fitness)
         }
 
 //        labyrinth = LabyrinthGenerator.generate(10, 10, Random(1))
 //        walls = labyrinth.asWalls()
-
-        val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()) { runnable ->
-            thread(isDaemon = true, start = false) { runnable.run() }
-        }
 
         val fitness = threadPool
                 .invokeAll(pokémon.map(ASI::toFitnessChecker))
@@ -58,8 +66,10 @@ object Trainer {
                 .shuffled()
                 .sortedByDescending { it.fitness }
 
-        val surviveCount = (numPokémon * 0.75).toInt().coerceAtLeast(1)
-        val mutateCount = (numPokémon * 0.25).toInt()
+        println(fitness.last().pokemon.brain.toString())
+
+        val surviveCount = (numPokémon * 0.05).toInt().coerceAtLeast(1)
+        val mutateCount = (numPokémon * 0.95).toInt()
 
         pokémon = fitness.take(surviveCount).map { it.pokemon.copy() }
 
@@ -91,7 +101,7 @@ object Trainer {
         }
     }
 
-    fun load() {
+    fun load(): Boolean {
         val saveFile = File("savefile.sav")
         if (saveFile.exists()) {
             log.info("loading generation")
@@ -99,7 +109,10 @@ object Trainer {
                 pokémon = stream.readObject() as List<ASI>
             }
             log.info("loading complete")
+            return true
         }
+
+        return false
     }
 
     fun train(pokemon: ASI, on: Labyrinth): Double {
@@ -138,19 +151,24 @@ object Trainer {
             body.alive && enemy.alive -> 0.0
             else -> time - roundTime
         }
-        return timeScore + body.visitedTiles.size * 10 - enemyDistance / 50 + body.movedDistance / 1000 + body.shotBullets
+        return timeScore + body.visitedTiles.size * 10 - enemyDistance / 50 + body.movedDistance / 1000 + body.shotBullets * 5 - body.blockedTicks / 30
     }
 
     fun ASI.mutate() {
-        val brainMass = brain.allAxons
-                .flatMap { axon -> Array(axon.x) { i -> Array(axon.y) { j -> axon to Point(i, j) }.toList() }.flatMap { it }.toList() }
+        copyCount = 0
+
+        val allAxons = brain.allAxons
+
+        allAxons.map { axon -> Array(axon.w) { x -> Array(axon.h) { y -> axon to Point(x, y) } } }
+                .flatMap { it.toList() }
+                .flatMap { it.toList() }
                 .shuffled()
-        brainMass.take(brainMass.size * 4 / 100)
+                .take(allAxons.size * 80 / 100)
                 .forEach { pair ->
                     val (axon, position) = pair
 
                     val ohm = axon[position.x, position.y]
-                    axon[position.x, position.y] = ohm + (Math.random() * 1 - 0.5) + (ohm * (Math.random() * 10 - 5) / 100)
+                    axon[position.x, position.y] = ohm + (Math.random() * 0.1 - 0.5)
                 }
     }
 }

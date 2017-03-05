@@ -61,10 +61,10 @@ fun main(args: Array<String>) {
 
     log.info("Application start")
 
-//    Application.launch(App::class.java)
+    Application.launch(App::class.java)
 
-    val gameLoop = GameLoop()
-    while (true) {
-        gameLoop.handle(System.nanoTime())
-    }
+//    val gameLoop = GameLoop()
+//    while (true) {
+//        gameLoop.handle(System.nanoTime())
+//    }
 }

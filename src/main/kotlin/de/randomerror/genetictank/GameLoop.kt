@@ -3,7 +3,6 @@ package de.randomerror.genetictank
 import de.randomerror.genetictank.entities.Entity
 import de.randomerror.genetictank.entities.Projectile
 import de.randomerror.genetictank.entities.Tank
-import de.randomerror.genetictank.entities.Wall
 import de.randomerror.genetictank.genetic.ASI
 import de.randomerror.genetictank.genetic.StillPlayer
 import de.randomerror.genetictank.genetic.Trainer
@@ -25,7 +24,9 @@ class GameLoop(val canvas: Canvas? = null) {
     var translate: Vector2D = Vector2D(0.0, 0.0)
     var scale: Double = 1.0
     var fps = 0.0
-    var showTime = 30.0
+    var showTime = 0.0
+    var showCaseLab = 0
+    var showCaseIndex = 0
 
     var KI = Tank(150.0, 10.0, Trainer.pokémon.first())
     var fitnesses = listOf<Trainer.PokemonFitness>()
@@ -36,17 +37,24 @@ class GameLoop(val canvas: Canvas? = null) {
 
     var fitnessGraph: Graph? = null
     var averagesGraph: Graph? = null
-
+    
     init {
         log.info("running with ${Runtime.getRuntime().availableProcessors().coerceAtMost(32)} threads")
 
-        Trainer.load()
+        if(Trainer.load()) {
+            labyrinth = Trainer.trainingLabyrinths[showCaseLab++]
+
+            entities += Tank(400.0, 400.0, StillPlayer())
+            entities += Tank(150.0, 10.0, Trainer.pokémon[showCaseIndex].copy())
+            
+            showTime = 30.0
+        }
         canvas?.widthProperty()?.addListener { observable, oldValue, newValue -> calculateScale() }
         canvas?.heightProperty()?.addListener { observable, oldValue, newValue -> calculateScale() }
 
-        entities += Tank(900.0, 900.0, StillPlayer())
-        entities += KI
-
+//        entities += Tank(900.0, 900.0, StillPlayer())
+//        entities += KI
+//
 //        entities += Tank(150.0, 150.0, Color.PURPLE)
 
         entities += labyrinth.asWalls()
@@ -86,50 +94,62 @@ class GameLoop(val canvas: Canvas? = null) {
 
         if (!entities.filter { it is Tank }.all { (it as Tank).alive } || keyDown("g", once = true) || showTime <= 40) {
             entities.clear()
+            
+            if(showCaseLab < Trainer.trainingLabyrinths.size && Trainer.generation != 0) {
+                labyrinth = Trainer.trainingLabyrinths[showCaseLab++]
+                entities += labyrinth.asWalls()
 
-            evolveThread = thread(isDaemon = true, name = "evolver") {
-                evolvePercentage = 0.0
-
-                fitnesses = Trainer.evolve { percentage -> evolvePercentage = percentage }
-                averages += fitnesses.sumByDouble { it.fitness } / fitnesses.size
-
-                val bestFitness = fitnesses.first().fitness
-                val bestFitness5 = fitnesses[4].fitness
-                val worstFitness = fitnesses.last().fitness
-                val averageFitness = averages.last()
-                val medianFitness = fitnesses[fitnesses.size / 2].fitness
-
-                val fitnessesReversed = fitnesses.reversed()
-
-                fitnessGraph = canvas?.let {
-                    Graph(
-                            0.5, 10, "fitness",
-                            2.0, 5, "sorted tanks",
-                            mapOf(Color.BLUE to (0 until fitnessesReversed.size).associateBy(Int::toDouble, { fitnessesReversed[it].fitness }),
-                                    Color.ORANGE to mapOf(0.0 to averageFitness, fitnessesReversed.size.toDouble() to averageFitness))
-                    )
-                }
-
-                if (averages.size > 1) {
-                    val xScale = (fitnessGraph?.width ?: 0.0) / (averages.size - 1)
-                    averagesGraph = canvas?.let {
-                        Graph(
-                                xScale, 5, "average fitness",
-                                2.0, 10, "generation",
-                                mapOf(Color.ORANGE to (0 until averages.size).associateBy(Int::toDouble, { averages[it] }))
-                        )
-                    }
-                }
-
-                log.info("generation: ${Trainer.generation}, best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
-
-                labyrinth = Trainer.trainingLabyrinths[0]
-                entities += Trainer.trainingLabyrinths[0].asWalls()
-
-                entities += Tank(900.0, 900.0, StillPlayer())
-                entities += Tank(150.0, 10.0, Trainer.pokémon[4].copy())
+                entities += Tank(400.0, 400.0, StillPlayer())
+                entities += Tank(150.0, 10.0, Trainer.pokémon[showCaseIndex].copy())
 
                 showTime = 30.0
+            } else {
+                showCaseLab = 0
+                
+                evolveThread = thread(isDaemon = true, name = "evolver") {
+                    evolvePercentage = 0.0
+
+                    fitnesses = Trainer.evolve { percentage -> evolvePercentage = percentage }
+                    averages += fitnesses.sumByDouble { it.fitness } / fitnesses.size
+
+                    val bestFitness = fitnesses.first().fitness
+                    val bestFitness5 = fitnesses[4].fitness
+                    val worstFitness = fitnesses.last().fitness
+                    val averageFitness = averages.last()
+                    val medianFitness = fitnesses[fitnesses.size / 2].fitness
+
+                    val fitnessesReversed = fitnesses.reversed()
+
+                    fitnessGraph = canvas?.let {
+                        Graph(
+                                0.5, 10, "fitness",
+                                2.0, 5, "sorted tanks",
+                                mapOf(Color.BLUE to (0 until fitnessesReversed.size).associateBy(Int::toDouble, { fitnessesReversed[it].fitness }),
+                                        Color.ORANGE to mapOf(0.0 to averageFitness, fitnessesReversed.size.toDouble() to averageFitness))
+                        )
+                    }
+
+                    if (averages.size > 1) {
+                        val xScale = (fitnessGraph?.width ?: 0.0) / (averages.size - 1)
+                        averagesGraph = canvas?.let {
+                            Graph(
+                                    xScale, 5, "average fitness",
+                                    2.0, 10, "generation",
+                                    mapOf(Color.ORANGE to (0 until averages.size).associateBy(Int::toDouble, { averages[it] }))
+                            )
+                        }
+                    }
+
+                    log.info("generation: ${Trainer.generation}, best: $bestFitness, 5th: $bestFitness5, median: $medianFitness, average: $averageFitness, worst: $worstFitness")
+
+                    labyrinth = Trainer.trainingLabyrinths[showCaseLab++]
+                    entities += labyrinth.asWalls()
+
+                    entities += Tank(400.0, 400.0, StillPlayer())
+                    entities += Tank(150.0, 10.0, Trainer.pokémon[showCaseIndex].copy())
+
+                    showTime = 30.0
+                }
             }
 
             return
@@ -204,12 +224,12 @@ class GameLoop(val canvas: Canvas? = null) {
                         .singleOrNull()
                         ?.let { thinkData ->
                             val input = thinkData[0]
-                            (0 until input.y).map { input[it] }.forEachIndexed { index, value ->
+                            (0 until input.h).map { input[it] }.forEachIndexed { index, value ->
                                 fillText("$value", 0.0, index * 15.0)
                             }
 
                             thinkData.drop(1).forEachIndexed { layer, vector ->
-                                (0 until vector.y).map { vector[it] }.forEachIndexed { index, value ->
+                                (0 until vector.h).map { vector[it] }.forEachIndexed { index, value ->
                                     fill = Color.color(1 - value, 1 - value, 1 - value)
                                     fillRect(layer * 20.0 + 140.0, index * 15.0 - 10.0, 20.0, 15.0)
 
